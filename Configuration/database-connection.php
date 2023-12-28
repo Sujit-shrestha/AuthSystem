@@ -13,7 +13,7 @@ class DBConnect
   private $password = "";
   private $database = "api_database";
 
-  private $conn;
+  public $conn;
 
   //begins connection on object instantiation
   public function __construct()
