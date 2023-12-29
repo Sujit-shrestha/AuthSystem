@@ -16,7 +16,7 @@ class User{
 
   /*
   @returns array 
-  gets all data from user table
+  gets all data from user tablee
   */
   public function get():array{
     try{
