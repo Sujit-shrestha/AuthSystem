@@ -1,15 +1,19 @@
 <?php
 namespace Middleware;
 
+require_once 'vendor/autoload.php';
+
 include_once "../Model/user-mdoel.php";
 use Model\User;
 
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\key;
+use \Firebase\JWT\JWT;
+use \Firebase\JWT\key;
 
 /** 
  * checks if the user is present in the database
+ * developer can add multiple tokenization /verification
+ *  techniques
  */
 abstract class Authentication
 {
@@ -20,18 +24,24 @@ abstract class Authentication
     $this->userModel = $userModel;
 
   }
+  /**
+   * @return_ true on verified and array on 
+   * exception
+   */
   public function authenticate($username, $password)
   {
     try {
       $result = $this->userModel->get(null, $username);
-      if ($result["status"] == false) {
-        throw new \Exception("Unable to find the user.");
-      } else {
-        if (password_verify($password, $result["password"])) {
+
+      if ($result) {
+      if (password_verify($password, $result["password"])) {
+          //user gets authenticated if code reaches here
           return true;
         } else {
-          throw new \Exception("Unable to verify the password");
+          throw new \Exception("Unable to verify the password for given username.");
         }
+      } else {
+        return false;
       }
 
     } catch (\Exception $e) {
@@ -40,13 +50,13 @@ abstract class Authentication
     }
   }
 
-  abstract public static function createToken();
-  abstract public static function verifyToken();
+  abstract public static function createToken(array $payload , int $exp);
+  abstract public static function verifyToken(string $token);
 
 
 }
 
-class JWTTokenHandler extends Authentication
+class JWTTokenHandlerAndAuthentication extends Authentication
 {
 
   static $token;
