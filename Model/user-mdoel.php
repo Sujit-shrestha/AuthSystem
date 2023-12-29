@@ -115,9 +115,9 @@ class User
    * @ return bool || array
    * 
    */
-  public function delete(int $id) 
+  public function delete(int $id)
   {
-    try{
+    try {
       $sql = "
       DELETE FROM User 
       WHERE id = '$id'
@@ -125,9 +125,9 @@ class User
       $result = $this->DBconn->conn->query($sql);
       return $result;
 
-    }catch (\Exception $e) {
-      
-      return array ("error" => $e->getMessage());
+    } catch (\Exception $e) {
+
+      return array("error" => $e->getMessage());
     }
 
   }
