@@ -3,6 +3,9 @@
 use Firebase\JWT\JWT;
 use Firebase\JWT\key;
 
+/**
+ * created abstract class to let developer add multiple authoization techniques
+ */
 abstract class Authorization
 {
 
@@ -42,10 +45,32 @@ class JWTTokenHandler extends Authorization
 
 
   }
-
-  public static function verifyToken()
+  /**
+   * verifies provided token
+   * @param string token
+   * @return bool
+   */
+  public static function verifyToken(string $token):bool
   {
+    try {
+      static::$token = $token;
+      static::$token = JWT::decode($token, new key(static::$secret, static::$alg));
 
+      return true;
+
+    } catch (\Firebase\JWT\ExpiredException $e) {
+      echo "Token Expired";
+      return false;
+
+    } catch (\Firebase\JWT\SignatureInvalidException $e) {
+      echo "Invalid token provided";
+      return false;
+
+    } catch (\Exception $e) {
+      echo '' . $e->getMessage();
+      return false;
+
+    }
 
   }
 }
