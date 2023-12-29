@@ -3,11 +3,18 @@ namespace Model;
 
 include_once "../Configuration/database-connection.php";
 
-use DbConnection;
+use Configg\DBConnect;
 
 class User
 {
   private $DBconn;
+/* 
+  Dependency injection to use Database connection class properties
+  */
+  public function __construct(DbConnect $DBconn)
+  {
+    $this->DBconn = $DBconn;
+  }
 
   /**
    * static funciton to check if data is JSON data
@@ -21,22 +28,42 @@ class User
     return (json_last_error() == JSON_ERROR_NONE);
   }
 
-  /* 
-  Dependency injection to use Database connection class properties
-  */
-  public function __construct(DbConnection $DBconn)
-  {
-    $this->DBconn = $DBconn;
-  }
+  
 
   /**
    * @return array 
    * gets all data from user tablee
    */
 
-  public function get(): array
+  public function get(?int $id ,?string $username): array
   {
     try {
+      if(isset($id)){
+        
+        $sql = "SELECT * FROM User where id = $id";
+        $result = $this->DBconn->conn->query($sql);
+        if(! $result){
+          throw new \Exception("Unable to fetch the given id data");
+          }else{
+            return $result->fetch_assoc();
+          }
+      }
+
+      if(isset($username)){
+        
+        $sql = "SELECT * FROM User where username = '$username'";
+        $result = $this ->DBconn->conn->query($sql);
+        
+        if( $result->num_rows == 0){
+          throw new \Exception("Unable to fetch the given username data");
+        }else{
+          return $result->fetch_assoc();
+        }
+      }
+
+
+
+
       $sql = "SELECT * FROM User";
 
       $result = $this->DBconn->conn->query($sql);
@@ -51,7 +78,11 @@ class User
       }
 
     } catch (\Exception $e) {
-      return array("error" => $e->getMessage());
+      echo $e->getMessage();
+      return array(
+        "status" => false , 
+        "error" => $e->getMessage()
+        );
     }
   }
   /**
