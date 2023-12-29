@@ -109,9 +109,27 @@ class User
       return array("error" => $e->getMessage());
     }
   }
-  public function delete()
+  /**
+   * deletes a user using id
+   * @param int id
+   * @ return bool || array
+   * 
+   */
+  public function delete(int $id) 
   {
-    return "delete method";
+    try{
+      $sql = "
+      DELETE FROM User 
+      WHERE id = '$id'
+      ";
+      $result = $this->DBconn->conn->query($sql);
+      return $result;
+
+    }catch (\Exception $e) {
+      
+      return array ("error" => $e->getMessage());
+    }
+
   }
 
 }
