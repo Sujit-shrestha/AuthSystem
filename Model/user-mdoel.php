@@ -38,8 +38,25 @@ class User{
   }
 }
 
-  public function updatw(){
-    return "update method";
+//updates the database using id as reference
+  public function update($id , $data){
+    try{
+      $data = json_decode($data,true);
+      $sql = "UPDATE User 
+      SET email = '$data[email]' ,
+          password = '$data[password]' ,
+          username = '$data[username]' ,
+          name = '$data[name]',
+          address = '$data[address]',
+          user_type = '$data[user_type]'
+      WHERE id = '$id'
+       ";
+      $result = $this->DBconn->conn->query($sql);
+      return $result;
+    
+    }catch (\Exception $e){
+        return array("error" => $e->getMessage()); 
+    }
   }
 
   public function create(){
