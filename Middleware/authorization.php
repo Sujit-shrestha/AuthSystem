@@ -1,4 +1,17 @@
-<?php 
+<?php
+
+
+/**
+ *
+ */
+abstract class Authorization
+{
+
+
+}
+
+
+
 
 
 ?>
