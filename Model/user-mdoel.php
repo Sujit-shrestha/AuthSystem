@@ -5,6 +5,15 @@ include_once "../Configuration/database-connection.php";
 
 use Configg\DBConnect;
 
+/**
+ * default return from User class methods 
+ * @return array(
+        "status" => false|true,
+        "message" => $e->getMessage() | arrray of required data
+      );
+ * 
+ */
+
 class User
 {
   public $DBconn;
@@ -17,8 +26,8 @@ class User
   }
 
   /**
-   * static funciton to check if data is JSON data
-   * @ param json_data
+   * static funciton to check if data is JSON format data
+   * @param string jsontype 
    * @return bool
    */
 
@@ -31,6 +40,7 @@ class User
 
 
   /**
+   * @param int|NULL|string|NULL 
    * @return array 
    * gets all data from user tablee
    */
@@ -38,17 +48,26 @@ class User
   public function get(?int $id, ?string $username): array
   {
     try {
+
+      //checks for id
       if (isset($id)) {
 
         $sql = "SELECT * FROM User where id = $id";
         $result = $this->DBconn->conn->query($sql);
+
         if (!$result) {
           throw new \Exception("Unable to fetch the given id data");
         } else {
-          return $result->fetch_assoc();
+          $row = $result->fetch_assoc();
+
+          //hiding password in returned array -->problem when authenticating
+          // unset($row["password"]);
+
+          return $row;
         }
       }
 
+      //checks for username
       if (isset($username)) {
 
         $sql = "SELECT * FROM User where username = '$username'";
@@ -57,18 +76,23 @@ class User
         if ($result->num_rows == 0) {
           throw new \Exception("Unable to fetch the given username data");
         } else {
-          return $result->fetch_assoc();
+          $row = $result->fetch_assoc();
+
+          //hiding password in returned array
+          // unset($row["password"]);
+          return $row;
         }
       }
 
-
-
-
       $sql = "SELECT * FROM User";
-
       $result = $this->DBconn->conn->query($sql);
 
       $data = $result->fetch_all(MYSQLI_ASSOC);
+
+      //removing password fom response
+      foreach ($data as &$row) {
+        unset($row['password']);
+      }
       echo json_encode($data);
 
       if (empty($data)) {
@@ -78,26 +102,27 @@ class User
       }
 
     } catch (\Exception $e) {
-      echo $e->getMessage();
+      $error = $e->getMessage();
       return array(
-        "status" => false,
-        "error" => $e->getMessage()
+        "status" => "false",
+        "message" =>"$error"
       );
     }
   }
   /**
    * updates the database using id as reference
-   * 
+   * @param int|string
+   * @return array
    */
 
   public function update(int $id, string $data): array
   {
     try {
-      
+
       if (!User::isJson($data)) {
         throw new \Exception("The data is not json data.");
       } else {
-        
+
         $data = json_decode($data, true);
         $data["password"] = password_hash($data["password"], PASSWORD_BCRYPT);
         $sql = "UPDATE User 
@@ -114,8 +139,11 @@ class User
       }
 
     } catch (\Exception $e) {
-      print_r(array("error" => $e->getMessage()));
-      return array("error" => $e->getMessage());
+      print_r(array("message" => $e->getMessage()));
+      return array(
+        "status" => "false",
+        "message" => $e->getMessage()
+      );
     }
   }
 
@@ -146,7 +174,10 @@ class User
         return $result;
       }
     } catch (\Exception $e) {
-      return array("error" => $e->getMessage());
+      return array(
+        "status" => "false",
+        "message" => $e->getMessage()
+      );
     }
   }
   /**
@@ -168,7 +199,10 @@ class User
 
     } catch (\Exception $e) {
 
-      return array("error" => $e->getMessage());
+      return array(
+        "status" => "false",
+        "message" => $e->getMessage()
+      );
     }
 
   }
