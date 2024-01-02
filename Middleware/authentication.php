@@ -4,8 +4,11 @@ namespace Middleware;
 require_once 'vendor/autoload.php';
 
 include_once "../Model/user-mdoel.php";
-use Model\User;
+include_once "../Configuration/session.php";
 
+
+use Model\User;
+use Configg\Session;
 
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\key;
@@ -34,8 +37,11 @@ abstract class Authentication
       $result = $this->userModel->get(null, $username);
 
       if ($result) {
-      if (password_verify($password, $result["password"])) {
+        if (password_verify($password, $result["password"])) {
           //user gets authenticated if code reaches here
+          //adding user_type into session
+          Session::create();
+          $_SESSION["user_type"] = $result["user_type"];
           return true;
         } else {
           throw new \Exception("Unable to verify the password for given username.");
@@ -50,7 +56,7 @@ abstract class Authentication
     }
   }
 
-  abstract public static function createToken(array $payload , int $exp);
+  abstract public static function createToken(array $payload, int $exp);
   abstract public static function verifyToken(string $token);
 
 
@@ -61,6 +67,7 @@ class JWTTokenHandlerAndAuthentication extends Authentication
 
   static $token;
   static $secret = "INTUJI_SECRET KEY";
+  static $secretForNormalUser = "PINKUJI_SECRET KEY";
   static $alg = 'HS256';
 
   /**
@@ -117,5 +124,8 @@ class JWTTokenHandlerAndAuthentication extends Authentication
 
   }
 }
+
+
+
 
 ?>
