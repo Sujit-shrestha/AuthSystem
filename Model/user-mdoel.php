@@ -7,10 +7,10 @@ use Configg\DBConnect;
 
 class User
 {
-  private $DBconn;
-/* 
-  Dependency injection to use Database connection class properties
-  */
+  public $DBconn;
+  /* 
+    Dependency injection to use Database connection class properties
+    */
   public function __construct(DbConnect $DBconn)
   {
     $this->DBconn = $DBconn;
@@ -28,35 +28,35 @@ class User
     return (json_last_error() == JSON_ERROR_NONE);
   }
 
-  
+
 
   /**
    * @return array 
    * gets all data from user tablee
    */
 
-  public function get(?int $id ,?string $username): array
+  public function get(?int $id, ?string $username): array
   {
     try {
-      if(isset($id)){
-        
+      if (isset($id)) {
+
         $sql = "SELECT * FROM User where id = $id";
         $result = $this->DBconn->conn->query($sql);
-        if(! $result){
+        if (!$result) {
           throw new \Exception("Unable to fetch the given id data");
-          }else{
-            return $result->fetch_assoc();
-          }
+        } else {
+          return $result->fetch_assoc();
+        }
       }
 
-      if(isset($username)){
-        
+      if (isset($username)) {
+
         $sql = "SELECT * FROM User where username = '$username'";
-        $result = $this ->DBconn->conn->query($sql);
-        
-        if( $result->num_rows == 0){
+        $result = $this->DBconn->conn->query($sql);
+
+        if ($result->num_rows == 0) {
           throw new \Exception("Unable to fetch the given username data");
-        }else{
+        } else {
           return $result->fetch_assoc();
         }
       }
@@ -80,9 +80,9 @@ class User
     } catch (\Exception $e) {
       echo $e->getMessage();
       return array(
-        "status" => false , 
+        "status" => false,
         "error" => $e->getMessage()
-        );
+      );
     }
   }
   /**
@@ -93,10 +93,13 @@ class User
   public function update(int $id, string $data): array
   {
     try {
+      
       if (!User::isJson($data)) {
         throw new \Exception("The data is not json data.");
       } else {
+        
         $data = json_decode($data, true);
+        $data["password"] = password_hash($data["password"], PASSWORD_BCRYPT);
         $sql = "UPDATE User 
       SET email = '$data[email]' ,
           password = '$data[password]' ,
@@ -111,12 +114,15 @@ class User
       }
 
     } catch (\Exception $e) {
+      print_r(array("error" => $e->getMessage()));
       return array("error" => $e->getMessage());
     }
   }
 
   /**
    * Creates new user / Inserts into user table
+   * @param //jsondata
+   * @return bool|array
    */
 
   public function create($data)
@@ -126,6 +132,9 @@ class User
         throw new \Exception("Not json data");
 
       } else {
+        $data = json_decode($data, true);
+        //hashing the inserted password
+        $data["password"] = password_hash($data["password"], PASSWORD_BCRYPT);
         $sql = "
         INSERT INTO User 
       (email , password , username,  name , address , user_type)
@@ -154,6 +163,7 @@ class User
       WHERE id = '$id'
       ";
       $result = $this->DBconn->conn->query($sql);
+      echo $result;
       return $result;
 
     } catch (\Exception $e) {
