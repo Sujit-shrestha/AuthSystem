@@ -194,7 +194,7 @@ class User
       WHERE id = '$id'
       ";
       $result = $this->DBconn->conn->query($sql);
-      echo $result;
+
       return $result;
 
     } catch (\Exception $e) {
