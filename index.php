@@ -1,5 +1,7 @@
 <?php
 
+namespace Index;
+
 require_once "./Configuration/config.php";
 require_once "./Middleware/authentication.php";
 require_once "./Configuration/database-connection.php";
@@ -8,6 +10,7 @@ require_once "./Configuration/session.php";
 require_once "./Routes/login.php";
 require_once "./Middleware/response.php";
 require_once "./Middleware/response.php";
+require_once "./RequestHandlers/getMethodHandlers.php";
 
 
 use Middleware\JWTTokenHandlerAndAuthentication;
@@ -15,6 +18,10 @@ use Configg\DBConnect;
 use Model\User;
 use Configg\Session;
 use Middleware\Response;
+use Routes\Login;
+use RequestHandlers;
+
+require_once "./RequestHandlers/getMethodHandlers.php";
 
 function respondWithJson($data, $status)
 {
@@ -23,77 +30,91 @@ function respondWithJson($data, $status)
   echo json_encode($data);
 }
 
-
-
-
-switch ($_SERVER["REQUEST_METHOD"]) {
-  case "GET":
-    Session::create();
-    $authToken = $_SERVER["HTTP_AUTHORIZATION"];
+function getByIdOrUsername(){
+  $authToken = $_SERVER["HTTP_AUTHORIZATION"];
     $authToken = explode(" ", $authToken);
     $authToken = $authToken[1];
     $userObj = new User(new DBConnect());
     $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
     $tokenAuthStatus = JWTTokenHandlerAndAuthentication::verifyToken($authToken);
     if ($tokenAuthStatus) {
-      $id = $_GET["id"]??NULL;
-      $username = $_GET["username"]??NULL;
-      $result = $userObj->get($id , $username);
-      print_r($result);
-    }else{
+      $id = $_GET["id"] ?? NULL;
+      $username = $_GET["username"] ?? NULL;
+      $result = $userObj->get($id, $username);
+      unset($result["password"]);
+
+    $response = array(
+      "success" => "true",
+      "status" => "200",
+      "message" => "Data extraceted.",
+      "data" => $result
+    );
+    Response::respondWithJson($response, $response["status"]);
+    } else {
+     
       $response = array(
-        "success" => "flase",
+        "success" => "false",
         "status" => "401",
         "message" => "Unauthorised to get."
       );
+      
       Response::respondWithJson($response, $response["status"]);
     }
 
     //disconnecting from database
     $userObj->DBconn->disconnectFromDatabase();
+}
+function createUser(){
+  //creating user so auth not required
+
+  $userObj = new User(new DBConnect());
+  $jsonData = file_get_contents('php://input');
+
+  $result = $userObj->create($jsonData);
+  if ($result) {
+    $response = array(
+      "success" => "true",
+      "status" => "201",
+      "message" => "User created successfully"
+    );
+    Response::respondWithJson($response, $response["status"]);
+  } else {
+    $response = array(
+      "success" => "false",
+      "status" => "409",
+      "message" => "Unable to create user"
+    );
+    Response::respondWithJson($response, $response["status"]);
+  }
+}
+
+/**
+ * Switch to handle requests
+ * 
+ * 
+ */
+
+switch ($_SERVER["REQUEST_METHOD"]) {
+  case "GET":
+    getByIdOrUsername();
 
     break;
 
   case "POST":
     $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-    //creating Session
-    Session::create();
+
     //go to login if path is /login
     if ($path === '/login') {
       Login::login();
       exit;
+    }else{
+      createUser();
     }
-
-    //creating user so auth not required
-
-    $userObj = new User(new DBConnect());
-    $jsonData = file_get_contents('php://input');
-
-    $result = $userObj->create($jsonData);
-    if ($result) {
-      $response = array(
-        "success" => "true",
-        "status" => "201",
-        "message" => "User created successfully"
-      );
-      Response::respondWithJson($response, $response["status"]);
-    } else {
-      $response = array(
-        "success" => "false",
-        "status" => "409",
-        "message" => "Unable to create user"
-      );
-      Response::respondWithJson($response, $response["status"]);
-    }
-
-
 
     break;
 
   case "PUT":
-    // if ($path === '/createUser') {
-
-    // }
+    
     $authToken = $_SERVER["HTTP_AUTHORIZATION"];
     $authToken = explode(" ", $authToken);
     $authToken = $authToken[1];
@@ -102,15 +123,15 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 
     $tokenAuthStatus = JWTTokenHandlerAndAuthentication::verifyToken($authToken);
     if ($tokenAuthStatus) {
-      
+
       $jsonData = file_get_contents('php://input');
       $id = $_GET["id"];
-     
+
       $updateStatus = $userObj->update($id, $jsonData);
       print_r($updateStatus);
-      if ($updateStatus["result"]== true) {
+      if ($updateStatus["result"] == true) {
         echo "user updated Successfully";
-        
+
         // $response = array(
         //   "success" => "true",
         //   "status" => "204",
@@ -118,7 +139,7 @@ switch ($_SERVER["REQUEST_METHOD"]) {
         // );
         // print_r($response);
         // Response::respondWithJson($response, $response["status"]);
-      }else{
+      } else {
         print_r($updateStatus);
       }
     }
@@ -139,12 +160,12 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 
     if ($tokenAuthStatus) {
       $id = $_GET["id"];
-      $deleteStatus =$userObj->delete($id);
-      
-      if( $deleteStatus == true) {  
+      $deleteStatus = $userObj->delete($id);
 
-          echo "User Deleted";
-      }else{
+      if ($deleteStatus == true) {
+
+        echo "User Deleted";
+      } else {
         $response = array(
           "success" => "false",
           "status" => "500",
@@ -155,8 +176,8 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 
     }
 
-//disconnecting from database
-$userObj->DBconn->disconnectFromDatabase();
+    //disconnecting from database
+    $userObj->DBconn->disconnectFromDatabase();
 
     break;
 }
