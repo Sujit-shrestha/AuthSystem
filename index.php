@@ -12,6 +12,7 @@ require_once "./Middleware/response.php";
 require_once "./Middleware/response.php";
 
 
+use Exception;
 use Middleware\JWTTokenHandlerAndAuthentication;
 use Configg\DBConnect;
 use Model\User;
@@ -27,6 +28,11 @@ function respondWithJson($data, $status)
   echo json_encode($data);
 }
 
+
+
+/** 
+ * takes auth  ,verifies , gives  response
+ */
 function getByIdOrUsername()
 {
   $authToken = $_SERVER["HTTP_AUTHORIZATION"];
@@ -103,17 +109,17 @@ function updateUser()
     $id = $_GET["id"];
 
     $updateStatus = $userObj->update($id, $jsonData);
-    print_r($updateStatus);
-    if ($updateStatus["result"] == true) {
-      echo "user updated Successfully";
 
-      // $response = array(
-      //   "success" => "true",
-      //   "status" => "204",
-      //   "message" => "User Updated successfully"
-      // );
-      // print_r($response);
-      // Response::respondWithJson($response, $response["status"]);
+    if ($updateStatus["result"] == true) {
+
+      $response = array(
+        "success" => "true",
+        "status" => "201",
+        "message" => "User Updated successfully",
+        "updatedData" => json_decode($jsonData)
+      );
+      Response::respondWithJson($response, $response["status"]);
+
     } else {
       print_r($updateStatus);
     }
@@ -137,7 +143,7 @@ function deleteUser()
 
     if ($deleteStatus == true) {
 
-      echo "User Deleted";
+
     } else {
       $response = array(
         "success" => "false",
@@ -153,42 +159,107 @@ function deleteUser()
   $userObj->DBconn->disconnectFromDatabase();
 
 }
+function getBrearerToken()
+{
+  try {
+    $authToken = $_SERVER["HTTP_AUTHORIZATION"];
+    $authToken = explode(" ", $authToken);
+
+    if (!$authToken[0] == "Bearer") {
+
+      throw new Exception("Not a bearer toekn.");
+    } else {
+      $authToken = $authToken[1];
+      return $authToken;
+    }
+
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
+
+
+}
+function getUserTypeFromToken()
+{
+  try {
+    $authToken = getBrearerToken();
+
+    return JWTTokenHandlerAndAuthentication::getSpecificValueFromToken($authToken, "user_type");
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
+}
 /**
  * Switch to handle requests
  * 
  * 
  */
+//seperating login part//sets $_SESSION["user_type]
+$path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+if ($_SERVER["REQUEST_METHOD"] == "POST" && $path === '/login') {
+  if ($path === '/login') {
+    Login::login();
+    exit();
+  }
+}
+
 
 switch ($_SERVER["REQUEST_METHOD"]) {
   case "GET":
-    getByIdOrUsername();
+
+
+    $user_type = getUserTypeFromToken();
+   
+    if ($user_type == "admin") {
+      getByIdOrUsername();
+    }else if($user_type == "normal"){
+      Response::respondWithJson(array("status"=> "false" , "message"=> "Unauthorised") , 401);
+    }
+
 
     break;
 
   case "POST":
-    $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-
-    //go to login if path is /login
-    if ($path === '/login') {
-      Login::login();
-      exit;
-    } else {
-      createUser();
+    $user_type = getUserTypeFromToken();
+   
+    if ($user_type == "admin" || $user_type == "normal") {
+    
+    createUser();
+    }else{
+      Response::respondWithJson(array("status"=> "false" , "message"=> "Unauthorised") , 401);
     }
 
     break;
 
   case "PUT":
+    $user_type = getUserTypeFromToken();
+   
+    
+    if ($user_type == "admin") {
+      updateUser();
+    }else if($user_type == "normal"){
+      Response::respondWithJson(array("status"=> "false" , "message"=> "Unauthorised") , 401);
+    }
 
-    updateUser();
+
+
 
     break;
 
   case "DELETE":
+    $user_type = getUserTypeFromToken();
+   
+    if ($user_type == "admin") {
+        deleteUser();
+    }else if($user_type == "normal"){
+      Response::respondWithJson(array("status"=> "false" , "message"=> "Unauthorised") , 401);
+    }
+  
 
-    deleteUser();
+
     break;
 }
+
 
 
 ?>
