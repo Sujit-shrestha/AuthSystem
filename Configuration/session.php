@@ -9,7 +9,7 @@ class Session
     try {
       session_start();
       $_SESSION["startTime"] = time();
-      $_SESSION["id"] = session_id();
+      $_SESSION["sessionId"] = session_id();
       session_write_close();
       return true;
     } catch (\Exception $e) {
