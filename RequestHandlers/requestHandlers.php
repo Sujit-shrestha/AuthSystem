@@ -85,7 +85,6 @@ class RequestHandlers
         "data" => json_decode($jsonData, true)
       );
       return $response;
-
     }
 
     $checkIfUsernameExists = $userObj->get(NULL, $decodedData["username"]);
@@ -103,7 +102,6 @@ class RequestHandlers
     $fetchUserId = $userObj->get(NULL, $decodedData["username"]);
     $userId = $fetchUserId["id"];
     unset($fetchUserId);
-
     $decodedData["id"] = $userId;
 
     if ($result) {
@@ -139,8 +137,29 @@ class RequestHandlers
     if ($tokenAuthStatus) {
 
       $jsonData = file_get_contents('php://input');
-      $id = $_GET["id"];
+      //to validatte in the keys
+      $decodedData = json_decode($jsonData, true);
+    $keys = [
+      'username' => ['empty', 'maxlength', 'format'],
+      'password' => ['empty', 'maxlength', 'minLength'],
+      'email' => ['empty', 'email'],
+      'name' => ['empty'],
+      'address' => ['empty'],
+      'user_type' => ['empty']
+    ];
 
+    $validationResult = Validator::validate($decodedData, $keys);
+    if (!$validationResult["validate"]) {
+      $response = array(
+        "status" => "false",
+        "statusCode" => "409",
+        "message" => $validationResult,
+        "data" => json_decode($jsonData, true)
+      );
+      return $response;
+    }
+     
+      $id = $_GET["id"];
       $updateStatus = $userObj->update($id, $jsonData);
 
       if ($updateStatus["result"] == true) {
