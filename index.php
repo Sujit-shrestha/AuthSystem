@@ -30,7 +30,8 @@ use Routes\Login;
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $path === '/login') {
   if ($path === '/login') {
-    Login::login();
+    $response =Login::login();
+    Response::respondWithJson($response , $response["statusCode"]);
     exit();
   }
 }
