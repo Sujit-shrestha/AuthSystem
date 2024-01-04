@@ -47,6 +47,7 @@ abstract class Authentication
          
           $_SESSION["id"] = $result["id"];
           $_SESSION["user_type"] = $result["user_type"];
+         session_write_close();
          
           
           return true;
