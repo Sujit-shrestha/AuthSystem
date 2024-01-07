@@ -15,6 +15,8 @@ use Exception;
 use Middleware\JWTTokenHandlerAndAuthentication;
 use Configg\DBConnect;
 use Model\User;
+use Psy\Command\ThrowUpCommand;
+use UnexpectedValueException;
 
 use Validate\Validator;
 
@@ -31,18 +33,37 @@ class RequestHandlers
    */
   public static function getByIdOrUsername()
   {
-    $authToken = $_SERVER["HTTP_AUTHORIZATION"];
-    $authToken = explode(" ", $authToken);
-    $authToken = $authToken[1];
+   
+    $authToken = self::getBrearerToken();
+  
+
+
     $userObj = new User(new DBConnect());
     $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
     $tokenAuthStatus = JWTTokenHandlerAndAuthentication::verifyToken($authToken);
+  
     if ($tokenAuthStatus) {
       $id = $_GET["id"] ?? NULL;
       $username = $_GET["username"] ?? NULL;
+      
+      if($id==NULL && $username == NULL) {
+        return [
+          "status"=> "false",
+          "statusCode"=>"401",
+          "message"=> "Id or username must be provided!!"
+        ];
+      }
+      
       $result = $userObj->get($id, $username);
+      if($result["status"] == "false") {
+        return [
+          "status"=> "false",
+          "statusCode"=> 404,
+          "message"=> "User requested not available!!"
+        ];
+      }
       unset($result["password"]);
-
+     
       return [
         "status" => "true",
         "statusCode" => "200",
@@ -185,67 +206,90 @@ class RequestHandlers
   }
   public static function deleteUser()
   {
-    $authToken = $_SERVER["HTTP_AUTHORIZATION"];
-    $authToken = explode(" ", $authToken);
-    $authToken = $authToken[1];
-    $userObj = new User(new DBConnect());
-    $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
-
-    $tokenAuthStatus = JWTTokenHandlerAndAuthentication::verifyToken($authToken);
-
-    if ($tokenAuthStatus) {
-      $id = $_GET["id"];
-      $deleteStatus = $userObj->delete($id);
-
-      if ($deleteStatus == true) {
-        return [
-          "status" => "true",
-          "statusCode" => 200,
-          "message" => "User if Id :$id deleted successfully"
-        ];
-
-      } else {
-        return [
-          "status" => "false",
-          "statusCode" => 400,
-          "message" => "$deleteStatus"
-        ];
-
-      }
-
-    }
-
-    //disconnecting from database
-    $userObj->DBconn->disconnectFromDatabase();
-
-  }
-  public static function getBrearerToken()
-  {
-    try {
+    try{
+      
+    // 
+      // if(!isset($headers["HTTP_AUTHORIZATION"])){
+      //   return [
+      //     "status" => "false",
+      //     "statusCode" => 498,
+      //     "message" => "Authentication token not provided."
+      //   ];
+      // }
       $authToken = $_SERVER["HTTP_AUTHORIZATION"];
       $authToken = explode(" ", $authToken);
-
-      if (!$authToken[0] == "Bearer") {
-
-        throw new Exception("Not a bearer toekn.");
-      } else {
-        $authToken = $authToken[1];
-        return $authToken;
+      $authToken = $authToken[1];
+      $userObj = new User(new DBConnect());
+      $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
+  
+      $tokenAuthStatus = JWTTokenHandlerAndAuthentication::verifyToken($authToken);
+     
+      if ($tokenAuthStatus) {
+        $id = $_GET["id"];
+        $deleteStatus = $userObj->delete($id);
+  
+        if ($deleteStatus == true) {
+          return [
+            "status" => "true",
+            "statusCode" => 200,
+            "message" => "User if Id :$id deleted successfully"
+          ];
+  
+        } else {
+          return [
+            "status" => "false",
+            "statusCode" => 400,
+            "message" => "$deleteStatus"
+          ];
+  
+        }
+  
       }
+  
+      //disconnecting from database
+      $userObj->DBconn->disconnectFromDatabase();
+  
+    }catch(Exception $e){
+      return [
+        "status" => "false",
+        "message" => $e->getMessage()
+      ];
+    
+  }
+}
+  public static function getBrearerToken():string
+  {
+    try {
+      $authToken = $_SERVER["HTTP_AUTHORIZATION"]??false;
+     
+      if($authToken === false){
+   
+       throw new Exception("Authorization header not present!!");
+      }
+      $authToken = explode(" ", $authToken);
 
-    } catch (Exception $e) {
-      return $e->getMessage();
+      if (count($authToken) !== 2 || $authToken[0] !== "Bearer") {
+        throw new Exception("Invalid bearer token format.");
     }
 
-
+    return $authToken[1];
+  
+    } catch (Exception $e) {
+      echo $e->getMessage();
+      return "";
+    } 
   }
   public static function getUserTypeFromToken()
   {
     try {
+      
       $authToken = self::getBrearerToken();
-
+      if($authToken == ""){
+        throw new Exception("Token not available");
+      }
       return JWTTokenHandlerAndAuthentication::getSpecificValueFromToken($authToken, "user_type");
     } catch (Exception $e) {
+     
       return $e->getMessage();
     }
   }
