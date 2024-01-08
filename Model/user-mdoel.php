@@ -40,14 +40,47 @@ class User
 
 
   /**
-   * @param int|NULL|string|NULL 
-   * @return array 
+   * @param NULL
+   * @return array|FALSE
    * gets all data from user tablee
    */
 
+
+   //function not checked..
+   public function getAll()
+   {
+    try{
+      $sql = "SELECT * FROM User";
+      $result = $this->DBconn->conn->query($sql);
+
+      $data = $result->fetch_all(MYSQLI_ASSOC);
+
+      //removing password fom response
+      foreach ($data as &$row) {
+        unset($row['password']);
+      }
+
+      if (empty($data)) {
+        throw new \Exception("Unable to fetch data form DB");
+      } else {
+        return $data;
+      }
+    }catch(\Exception $e){
+      error_log($e->getMessage());
+      return false;
+   }
+  }
+  /**
+   * gets users data using either id or username 
+   * when both sent in parameter prioritizes id
+   * @param int|null , string|null
+   */
   public function get(?int $id, ?string $username): array
   {
     try {
+      if(!isset($id) && !isset($username)) {
+        throw new \Exception("Username and id field cannot be empty");
+      }
 
       //checks for id
       if (isset($id)) {
@@ -55,7 +88,7 @@ class User
         $sql = "SELECT * FROM User where id = $id";
         $result = $this->DBconn->conn->query($sql);
 
-        if (!$result) {
+        if (!$result->num_rows > 0) {
           throw new \Exception("Unable to fetch the given id data");
         } else {
           $row = $result->fetch_assoc();
@@ -83,26 +116,17 @@ class User
           return $row;
         }
       }
+      return [
+        "status" => "false",
+        "message" => "Unable to get data"
+      ];
 
-      $sql = "SELECT * FROM User";
-      $result = $this->DBconn->conn->query($sql);
-
-      $data = $result->fetch_all(MYSQLI_ASSOC);
-
-      //removing password fom response
-      foreach ($data as &$row) {
-        unset($row['password']);
-      }
-      echo json_encode($data);
-
-      if (empty($data)) {
-        throw new \Exception("Unable to fetch data form DB");
-      } else {
-        return $data;
-      }
+     
+      
 
     } catch (\Exception $e) {
       $error = $e->getMessage();
+      error_log($e->getMessage());
       return array(
         "status" => "false",
         "message" =>"$error"
@@ -139,11 +163,11 @@ class User
       }
 
     } catch (\Exception $e) {
-      print_r(array("message" => $e->getMessage()));
-      return array(
+      
+      return [
         "status" => "false",
         "message" => $e->getMessage()
-      );
+      ];
     }
   }
 
