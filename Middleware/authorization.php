@@ -19,8 +19,8 @@
 
     $permissions = [
       "" =>[],
-      "admin" => ["edit" , "delete" ] , 
-      "normal" =>["create"]
+      "admin" => ["PUT" , "DELETE" ] , 
+      "normal" =>["POST"]
     ];
 
 
@@ -30,8 +30,9 @@
     }else{
       return false;
     }
-
   }
+
+  
  }
   
 echo Authorization::checkPermission("admin");
