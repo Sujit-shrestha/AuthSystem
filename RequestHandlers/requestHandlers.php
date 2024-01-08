@@ -15,8 +15,7 @@ use Exception;
 use Middleware\JWTTokenHandlerAndAuthentication;
 use Configg\DBConnect;
 use Model\User;
-use Psy\Command\ThrowUpCommand;
-use UnexpectedValueException;
+
 
 use Validate\Validator;
 
@@ -147,10 +146,8 @@ class RequestHandlers
 
   public static function updateUser()
   {
-
-    $authToken = $_SERVER["HTTP_AUTHORIZATION"];
-    $authToken = explode(" ", $authToken);
-    $authToken = $authToken[1];
+    try{
+      $authToken = self::getBrearerToken();
     $userObj = new User(new DBConnect());
     $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
 
@@ -180,7 +177,14 @@ class RequestHandlers
       return $response;
     }
      
-      $id = $_GET["id"];
+      $id = $_GET["id"];if(!$id){
+        throw new Exception("Id not provided !!");
+      }
+      $result = $userObj->get($id, NULL);
+      if($result["status"] == "false"){
+        unset($result);
+      return throw new Exception("User not found to update!!");
+      } 
       $updateStatus = $userObj->update($id, $jsonData);
 
       if ($updateStatus["result"] == true) {
@@ -203,22 +207,21 @@ class RequestHandlers
     }
     //disconnecting from database
     $userObj->DBconn->disconnectFromDatabase();
+    }catch(Exception $e){
+      return ["status" => "false",
+      "statusCode"=>401,
+      "message"=> $e->getMessage() 
+    ];
+
+    }
+
+    
   }
   public static function deleteUser()
   {
     try{
-      
-    // 
-      // if(!isset($headers["HTTP_AUTHORIZATION"])){
-      //   return [
-      //     "status" => "false",
-      //     "statusCode" => 498,
-      //     "message" => "Authentication token not provided."
-      //   ];
-      // }
-      $authToken = $_SERVER["HTTP_AUTHORIZATION"];
-      $authToken = explode(" ", $authToken);
-      $authToken = $authToken[1];
+  
+      $authToken = self::getBrearerToken();
       $userObj = new User(new DBConnect());
       $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
   
@@ -226,6 +229,17 @@ class RequestHandlers
      
       if ($tokenAuthStatus) {
         $id = $_GET["id"];
+        if(!$id){
+          throw new Exception("Id not provided !!");
+        }
+        $result = $userObj->get($id, NULL);
+        if($result["status"] == "false"){
+          unset($result);
+        return throw new Exception("User not found to delete!!");
+        } 
+        
+       
+
         $deleteStatus = $userObj->delete($id);
   
         if ($deleteStatus == true) {
@@ -276,6 +290,7 @@ class RequestHandlers
   
     } catch (Exception $e) {
       echo $e->getMessage();
+      error_log($e->getMessage());  
       return "";
     } 
   }
