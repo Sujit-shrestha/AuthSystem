@@ -11,10 +11,14 @@ require_once "./Routes/login.php";
 require_once "./Middleware/response.php";
 require_once "./Middleware/response.php";
 require_once "./RequestHandlers/requestHandlers.php";
+require_once "./AccessControl/admin.php";
+require_once "./Routes/create.php";
 
+use AccessControl\Admin;
 use RequestHandlers\RequestHandlers;
 use Middleware\Response;
 use Routes\Login;
+use Routes\Create;
 
 
 
@@ -28,60 +32,45 @@ use Routes\Login;
 //seperating login part//sets $_SESSION["user_type]
 
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-if ($_SERVER["REQUEST_METHOD"] == "POST" && $path === '/login') {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && (($path === '/login') || ($path === '/create'))) {
   if ($path === '/login') {
-    $response =Login::login();
-    Response::respondWithJson($response , $response["statusCode"]);
+    $response = Login::login();
+    Response::respondWithJson($response, $response["statusCode"]);
+    exit();
+  }
+  if ($path === '/create') {
+    echo "here";
+    ////create path for post ...creating user
+    Create::create();
     exit();
   }
 }
 
+//getting user type form given auth token
+$user_type = RequestHandlers::getUserTypeFromToken();
 
-switch ($_SERVER["REQUEST_METHOD"]) {
-  case "GET":
 
-    $user_type = RequestHandlers::getUserTypeFromToken();
+switch ($user_type) {
+  case "admin":
+    $uri = $_SERVER['REQUEST_URI'];
 
-    if ($user_type == "admin") {
-      $response = RequestHandlers::getByIdOrUsername();
-      Response::respondWithJson($response, $response["statusCode"]);
-    } else if ($user_type == "normal") {
-      Response::respondWithJson(array("status" => "false", "message" => "Unauthorised"), 401);
+    // Regular expression to check if the URI starts with /admin
+    $pattern = '/^\/admin/';
+    
+    if (preg_match('/^\/admin/', $uri)) {
+      Admin::run();
     }
-
     break;
 
-  case "POST":
+  case "employee":
+    $response = [
+      "status" => false,
+      "message" => "Employee is unauthorised to use the system for now"
+    ];
 
-    $response = RequestHandlers::createUser();
-    Response::respondWithJson($response, $response["statusCode"]);
-
+    Response::respondWithJson($response, 401);
     break;
 
-  case "PUT":
-    $user_type = RequestHandlers::getUserTypeFromToken();
-
-    if ($user_type == "admin") {
-      Response::respondWithJson(RequestHandlers::updateUser(), 200);
-    } else if ($user_type == "normal") {
-      Response::respondWithJson(array("status" => "false", "message" => "Unauthorised"), 401);
-    }
-
-    break;
-
-  case "DELETE":
-    $user_type = RequestHandlers::getUserTypeFromToken();
-
-    if ($user_type == "admin") {
-
-      Response::respondWithJson(RequestHandlers::deleteUser(), 200);
-    } else if ($user_type == "normal") {
-      Response::respondWithJson(array("status" => "false", "message" => "Unauthorised"), 401);
-    }
-
-    break;
+ 
 }
-
-
-
 ?>
