@@ -4,17 +4,18 @@ use Middleware\Response;
 use Middleware\JWTTokenHandlerAndAuthentication;
 use Configg\DBConnect;
 use Model\User;
-use Configg\Session;
+
 
 //authenticate user 
 class Login
 {
   public static function login()
   {
+    
     $authenticationObj = new JWTTokenHandlerAndAuthentication(new User(new DBConnect()));
 
     $status = $authenticationObj->authenticate($_POST["username"], $_POST["password"]);
-
+    
     if ($status) {
  
       //defining payload
@@ -30,13 +31,23 @@ class Login
 
       //sets login true 
       $_SESSION["login"] = true;
-      setcookie("authToken", $authToken, time() + 3600, "/");
-
-      Response::respondWithJson(array("status"=> "success","authToken"=> $authToken , "message" => "User authenticated successfully.") , 200);
+      
+      return [
+        "status"=> "success",
+         "message" => "User authenticated successfully.",
+         "statusCode" => 200,
+         "authToken"=> $authToken
+      ];
+      
       
     }else{
       setcookie("authToken", "", time() + 3600, "/");
-      Response::respondWithJson(array("status"=> "false","message"=> "Unable to login.") , 403);
+      return [
+        "status"=> "false",
+        "message"=>"Unable to authenticate the user.",
+        "statusCode" => 401
+      ];
+    
     }
   }
 }
