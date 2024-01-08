@@ -31,7 +31,7 @@ abstract class Authentication
    * @return_ true on verified and array on 
    * exception
    */
-  public function authenticate($username, $password)
+  public function authenticate($username, $password):bool
   {
     try {
      
@@ -52,15 +52,16 @@ abstract class Authentication
           
           return true;
         } else {
-          throw new \Exception("Unable to verify the password for given username.");
+          throw new \Exception("Unable to verify for given password provided!!");
         }
       } else {
-        return false;
+        throw new \Exception("Unable to get from database on given username!!");
+       
       }
 
     } catch (\Exception $e) {
-      echo "Unable to authenticate : " . $e->getMessage();
-      $result = false;
+      error_log($e->getMessage());
+      return false;
     }
   }
 
@@ -73,7 +74,7 @@ abstract class Authentication
 class JWTTokenHandlerAndAuthentication extends Authentication
 {
 
-  static $token;
+  static $token=[];
   static $secret = "INTUJI_SECRET KEY";
   // static $secretForNormalUser = "PINKUJI_SECRET KEY";
   static $alg = 'HS256';
@@ -86,18 +87,18 @@ class JWTTokenHandlerAndAuthentication extends Authentication
   public static function createToken(array $payload, int $exp = 3600)
   {
     try {
-      static::$token = [
+      self::$token = [
         "iat" => time(),
         "exp" => time() + $exp,
         "data" => $payload
       ];
 
-      static::$token = JWT::encode(static::$token, static::$secret, static::$alg);
+      self::$token = JWT::encode(self::$token, self::$secret, self::$alg);
 
-      return static::$token;
+      return self::$token;
 
     } catch (\Exception $e) {
-      echo '' . $e->getMessage() . '';
+      error_log($e->getMessage());
       return false;
     }
 
@@ -118,17 +119,14 @@ class JWTTokenHandlerAndAuthentication extends Authentication
 
     } catch (\Firebase\JWT\ExpiredException $e) {
       echo "Token Expired";
+      error_log($e->getMessage());
       return false;
 
     } catch (\Firebase\JWT\SignatureInvalidException $e) {
       echo "Invalid token provided";
+      error_log($e->getMessage());
       return false;
-
-    } catch (\Exception $e) {
-      echo '' . $e->getMessage();
-      return false;
-
-    }
+    } 
 
   }
 
@@ -136,8 +134,9 @@ class JWTTokenHandlerAndAuthentication extends Authentication
     try {
       
      
-      $payload = JWT::decode($authToken, new key(static::$secret, static::$alg));
+      $payload = JWT::decode($authToken, new key(self::$secret, self::$alg));
     
+ 
       return $payload->data->user_type;
 
   } catch (\Firebase\JWT\ExpiredException $e) {
