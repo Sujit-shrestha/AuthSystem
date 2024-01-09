@@ -38,9 +38,8 @@ $keys = [
         $maxAllowedLength = [
           "password" => "40",
           "username" => 25,
-          "email" =>254, 
-          "address" => 254,
-          "name" => 100
+          "email" =>50, 
+          "name" => 50
         ];
 
         $inputLength = strlen($data[$key]);
@@ -56,7 +55,7 @@ $keys = [
         $minAllowedLength = [
           "password" => "8" ,
           "username"=> "5",
-          "email" => "5" ,
+          "email" => "7" ,
           "address" => "2" ,
           "name" => "2"
         ];
