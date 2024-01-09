@@ -118,12 +118,12 @@ class JWTTokenHandlerAndAuthentication extends Authentication
       return true;
 
     } catch (\Firebase\JWT\ExpiredException $e) {
-      echo "Token Expired";
+      // echo "Token Expired";
       error_log($e->getMessage());
       return false;
 
     } catch (\Firebase\JWT\SignatureInvalidException $e) {
-      echo "Invalid token provided";
+      // echo "Invalid token provided";
       error_log($e->getMessage());
       return false;
     } 
@@ -135,21 +135,37 @@ class JWTTokenHandlerAndAuthentication extends Authentication
       
      
       $payload = JWT::decode($authToken, new key(self::$secret, self::$alg));
-    
+    $user_type =  $payload->data->user_type;
  
-      return $payload->data->user_type;
+      return [
+        "status"=>true ,
+        "user_type" => $user_type,
+        "message" => "Users user_type has been found!!"
+      ];
 
   } catch (\Firebase\JWT\ExpiredException $e) {
-    echo "Token Expired";
-    return false;
+    // echo "Token Expired";
+    return [
+      "status"=>false,
+      "user_type" => "",
+      "message" => "Token Expired"
+    ];
 
   } catch (\Firebase\JWT\SignatureInvalidException $e) {
-    echo "Invalid token provided";
-    return false;
+    // echo "Invalid token provided";
+    return [
+      "status"=>false,
+      "user_type" => "",
+      "message" => "Invalid token provided"
+    ];
 
   } catch (\Exception $e) {
-    echo '' . $e->getMessage();
-    return false;
+    // echo '' . $e->getMessage();
+    return [
+      "status"=>false,
+      "user_type" => "",
+      "message" => $e->getMessage()
+    ];
 
   }
 
