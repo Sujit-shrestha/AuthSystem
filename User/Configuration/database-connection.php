@@ -1,9 +1,8 @@
 <?php
-namespace Config;
+namespace Configg;
 
 use Exception;
 use mysqli;
-
 
 class DBConnect
 {
@@ -28,11 +27,8 @@ class DBConnect
 
       if ($this->conn->connect_error) {
         throw new Exception($this->conn->connect_error);
-      } else {
-        echo "\n" . "Database connected Successfully" . "\n";
-      }
-      
-
+      } 
+    
     } catch (Exception $e) {
       echo "\n" . $e->getMessage() . "\n";
     }
@@ -43,7 +39,6 @@ class DBConnect
     try{
       if($this->conn){
         $this->conn->close();
-        echo "Database Disconnected.";
       }else{
         throw new Exception("Unable to disconnect from database.");
       }
