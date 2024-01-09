@@ -14,12 +14,14 @@ require_once "./Routes/delete.php";
 require_once "./Middleware/response.php";
 require_once "./Middleware/response.php";
 require_once "./RequestHandlers/requestHandlers.php";
+require_once "./Routes/route.php";
 
 
 use Routes\Create;
 use Routes\Delete;
 use Routes\Get;
 use Routes\Update;
+use Routes\Route;
 
 
 class Admin
@@ -27,43 +29,38 @@ class Admin
   public static function run()
   {
     $uri = $_SERVER['REQUEST_URI'];
+    //sets the route after/admin
+    $uri = explode('/', $uri)[2];
+    
+  
+
     switch ($_SERVER["REQUEST_METHOD"]) {
       case "GET":
-        /**
-         * gets data and sends  respoonse
-         */
-        //check if the route is /admin/get
-        if (preg_match('/^\/admin\/get(?:\/[^?]+)?(?:\?.+)?$/', $uri)) {
-          Get::get();
-        }
+     
+        Route::get($uri , "Routes\\Get::get");
 
         break;
 
       case "POST":
-        if (preg_match('/^\/admin\/create(?:\/[^?]+)?(?:\?.+)?$/', $uri)) {
-          Create::create();
-        }
+
+       Route::post($uri , "Routes\\Create::create");
 
         break;
 
       case "PUT":
-        if (preg_match('/^\/admin\/update(?:\/[^?]+)?(?:\?.+)?$/', $uri)) {
-
-          Update::update();
-        }
+       
+        Route::put($uri ,'Routes\\Update::update');
 
         break;
 
       case "DELETE":
-        if (preg_match('/^\/admin\/delete(?:\/[^?]+)?(?:\?.+)?$/', $uri)) {
-          Delete::delete();
-
-        }
+      
+        Route::delete($uri ,'Routes\\Delete::delete');
         break;
       
 
       default:
-      echo "Invalid Request";
+      echo "Route/request not found";
         break;
     }
   }
