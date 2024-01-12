@@ -1,15 +1,8 @@
 <?php
 namespace Middleware;
 
-require_once 'vendor/autoload.php';
-
-include_once "../Model/user-mdoel.php";
-include_once "../Configuration/session.php";
-
-
 use Model\User;
 use Configg\Session;
-
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\key;
 
@@ -31,10 +24,10 @@ abstract class Authentication
    * @return_ true on verified and array on 
    * exception
    */
-  public function authenticate($username, $password):bool
+  public function authenticate($username, $password): bool
   {
     try {
-     
+
       $result = $this->userModel->get(null, $username);
 
       if ($result) {
@@ -43,20 +36,20 @@ abstract class Authentication
 
           //adding user_type into session
           Session::create();
-         
-         
+
+
           $_SESSION["id"] = $result["id"];
           $_SESSION["user_type"] = $result["user_type"];
-         session_write_close();
-         
-          
+          session_write_close();
+
+
           return true;
         } else {
           throw new \Exception("Unable to verify for given password provided!!");
         }
       } else {
         throw new \Exception("Unable to get from database on given username!!");
-       
+
       }
 
     } catch (\Exception $e) {
@@ -74,7 +67,7 @@ abstract class Authentication
 class JWTTokenHandlerAndAuthentication extends Authentication
 {
 
-  static $token=[];
+  static $token = [];
   static $secret = "INTUJI_SECRET KEY";
   // static $secretForNormalUser = "PINKUJI_SECRET KEY";
   static $alg = 'HS256';
@@ -126,48 +119,49 @@ class JWTTokenHandlerAndAuthentication extends Authentication
       // echo "Invalid token provided";
       error_log($e->getMessage());
       return false;
-    } 
+    }
 
   }
 
-  public static function getSpecificValueFromToken($authToken , $key ){
+  public static function getSpecificValueFromToken($authToken, $key)
+  {
     try {
-      
-     
+
       $payload = JWT::decode($authToken, new key(self::$secret, self::$alg));
-    $user_type =  $payload->data->user_type;
- 
+
+      $user_type = $payload->data->user_type;
+
       return [
-        "status"=>true ,
+        "status" => true,
         "user_type" => $user_type,
         "message" => "Users user_type has been found!!"
       ];
 
-  } catch (\Firebase\JWT\ExpiredException $e) {
-    // echo "Token Expired";
-    return [
-      "status"=>false,
-      "user_type" => "",
-      "message" => "Token Expired"
-    ];
+    } catch (\Firebase\JWT\ExpiredException $e) {
+      // echo "Token Expired";
+      return [
+        "status" => false,
+        "user_type" => "",
+        "message" => "Token Expired"
+      ];
 
-  } catch (\Firebase\JWT\SignatureInvalidException $e) {
-    // echo "Invalid token provided";
-    return [
-      "status"=>false,
-      "user_type" => "",
-      "message" => "Invalid token provided"
-    ];
+    } catch (\Firebase\JWT\SignatureInvalidException $e) {
+      // echo "Invalid token provided";
+      return [
+        "status" => false,
+        "user_type" => "",
+        "message" => "Invalid token provided"
+      ];
 
-  } catch (\Exception $e) {
-    // echo '' . $e->getMessage();
-    return [
-      "status"=>false,
-      "user_type" => "",
-      "message" => $e->getMessage()
-    ];
+    } catch (\Exception $e) {
+      // echo '' . $e->getMessage();
+      return [
+        "status" => false,
+        "user_type" => "",
+        "message" => $e->getMessage()
+      ];
 
-  }
+    }
 
   }
 
