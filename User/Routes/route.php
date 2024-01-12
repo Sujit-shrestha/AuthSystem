@@ -2,40 +2,50 @@
 
 namespace Routes;
 
-require_once "./Routes/create.php";
-require_once "./Routes/login.php";
-require_once "./Routes/get.php";
-require_once "./Routes/update.php";
-require_once "./Routes/delete.php";
-
-use Routes\Create;
-use Routes\Delete;
-use Routes\Get;
-use Routes\Update;
-
 class Route
 {
-  public static function post($endpoint, $callbackFunction)
+  public static function user($endpoint, $callbackFunction)
   {
     $endpoint = explode("/", trim($endpoint, "/"));
-
-    if ($endpoint[0] == "create") {
+    if ($endpoint[0] == "login") {
       $callbackFunction();
     }
+    if ($endpoint[0] == "user") {
+      $callbackFunction();
+    }
+  }
+
+  public static function category($endpoint, $callbackFunction){
+    $endpoint = explode("/", trim($endpoint, "/"));
+    if ($endpoint[0] == "category") {
+      $callbackFunction();
+    }
+
+  }
+
+  public static function post($endpoint, $callbackFunction)
+  {
+    // $endpoint = explode("/", trim($endpoint, "/"));
+    // if ($endpoint[0] == "create") {
+    //   $callbackFunction();
+    // }
+    $callbackFunction();
   }
 
   public static function get($endpoint, $callbackFunction)
   {
-    $endpoint = explode("/", trim($endpoint, "/"));
-if(substr($endpoint[0], 0, 3) === "get"){
-      $callbackFunction();
-    }
+    // $endpoint = explode("/", trim($endpoint, "/"));
+    // if (substr($endpoint[0], 0, 3) === "get") {
+    //   $callbackFunction();
+    // }
+
+    $callbackFunction();
   }
   public static function put($endpoint, $callbackFunction)
   {
     $endpoint = explode("/", trim($endpoint, "/"));
-   
-    if ( substr($endpoint[0], 0, 6) == "update") {
+
+    if (substr($endpoint[0], 0, 6) == "update") {
       $callbackFunction();
     }
   }
@@ -43,7 +53,7 @@ if(substr($endpoint[0], 0, 3) === "get"){
   {
     $endpoint = explode("/", trim($endpoint, "/"));
 
-    if (substr($endpoint[0], 0, 6) =="delete") {
+    if (substr($endpoint[0], 0, 6) == "delete") {
       $callbackFunction();
     }
   }
