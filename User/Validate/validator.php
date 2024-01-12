@@ -25,14 +25,27 @@ $keys = [
     foreach ($keys as $key => $value) {
       //check empty 
       if (in_array('empty', $value)) {
+       
         if (isset($data[$key]) && !empty($data[$key])) {
 
         } else {
           $validateData[$key] = [
-            $key . " is required!"
+            $key . " cannot be empty!"
           ];
         }
       }
+
+      if (in_array('required', $value)) {
+        if (!isset($data[$key])) {
+          
+          $validateData[$key] = [
+            $key . " is required field!!"
+          ];
+        } else {
+          
+        }
+      }
+
 
       //check max length
       if (in_array("maxLength", $value)) {
@@ -83,21 +96,21 @@ $keys = [
       if (in_array("passwordFormat", $value)) {
         function isValidPassword($password)
         {
-          if(!preg_match('/[A-Z]/', $password) ){
+          if (!preg_match('/[A-Z]/', $password)) {
             return "at least one uppercase letter is required !!";
           }
-         
-         if(!preg_match('/[a-z]/', $password) ){
-          return "at least one lowercase letter required !!";
-         }
 
-         if(!preg_match('/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/', $password) ){
-          return "at least one special character required !!";
-         }
+          if (!preg_match('/[a-z]/', $password)) {
+            return "at least one lowercase letter required !!";
+          }
+
+          if (!preg_match('/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/', $password)) {
+            return "at least one special character required !!";
+          }
           return true;
         }
-        $result =   isValidPassword($data[$key]);
-        ($result== true) ? [] : $validateData[$key] =[$key."needs $result"];
+        $result = isValidPassword($data[$key]);
+        ($result == true) ? [] : $validateData[$key] = [$key . "needs $result"];
       }
 
       if (in_array("email", $value)) {
