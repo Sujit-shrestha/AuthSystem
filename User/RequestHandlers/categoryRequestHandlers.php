@@ -158,8 +158,64 @@ class CategoryRequestHandlers
           "message" => $e->getMessage()
       ];
     }
+  }
 
 
+  public function updateChild(){
+    try {
+      $categoryModelObj = new Category(new DBConnect());
+
+      $jsonData = file_get_contents("php://input");
+      $decodedData = json_decode($jsonData, true);
+      $previousChild = $_GET["previousChild"];
+      if(empty($previousChild)){
+        throw new Exception("Previous child not provided!!");
+      }
+      $result = $categoryModelObj->get($previousChild ,NULL);
+
+     if($result["status"]=="false"){
+      throw new Exception("Child category not found in database!!");
+     }
+      
+      //validation
+      $dataToValidate = [
+        "previousChild" => $previousChild,
+        "newChild" => $decodedData["newChild"],
+      ];
+      $keys = [
+        'newChild' => ['empty', 'required'],
+        'previousChild' => ['empty' ,'required']
+      ];
+      
+      $validationResult = Validator::validate($dataToValidate, $keys);
+      if (!$validationResult["validate"]) {
+        $response = array(
+          "status" => "false",
+          "statusCode" => "409",
+          "message" => $validationResult,
+          "data" => $dataToValidate
+        );
+        return $response;
+      }
+      
+      $response = $categoryModelObj->updateCategory($previousChild, $decodedData["newChild"]);
+
+      if (!$response["status"]) {
+        throw new Exception("Unalbe to update in database!!");
+      }
+      return [
+        "status" => $response["status"],
+        "statusCode" => 200,
+        "message" => $response["message"]
+      ];
+
+    }catch(Exception$e){
+      return [
+          "status" => "false",
+          "message" => $e->getMessage(),
+          "statusCode" =>500
+      ];
+    }
   }
 
   public static function deleteCategory()
