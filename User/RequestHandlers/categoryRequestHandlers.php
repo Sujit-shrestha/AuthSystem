@@ -56,8 +56,6 @@ class CategoryRequestHandlers
       "data" => json_decode($jsonData, true)
 
     ];
-
-
   }
 
   /**
@@ -67,8 +65,6 @@ class CategoryRequestHandlers
   {
     $categoryObj = new Category(new DBConnect());
     $response = $categoryObj->getAll();
-
-
 
     return [
       "statusCode" => 200,
@@ -83,7 +79,6 @@ class CategoryRequestHandlers
    */
   public static function getByParent()
   {
-
     $categoryModelObj = new Category(new DBConnect());
     $parent = $_GET["parent"];
     $response = $categoryModelObj->get(NULL, $parent);
@@ -94,16 +89,13 @@ class CategoryRequestHandlers
       "message" => $response["message"],
       "data" => $response["data"]
     ];
-
-
-
   }
 
   /**
    *  takes preParent from params and newParent name from 
    *  body as json value
    */
-  public static function updateParent():array
+  public static function updateParent(): array
   {
     try {
       $categoryModelObj = new Category(new DBConnect());
@@ -111,15 +103,15 @@ class CategoryRequestHandlers
       $jsonData = file_get_contents("php://input");
       $decodedData = json_decode($jsonData, true);
       $previousParent = $_GET["previousParent"];
-      if(empty($previousParent)){
+      if (empty($previousParent)) {
         throw new Exception("Previous parent not provided!!");
       }
       $result = $categoryModelObj->get(NULL, $previousParent);
 
-     if($result["status"]=="false"){
-      throw new Exception("Parent category not found in database!!");
-     }
-      
+      if ($result["status"] == "false") {
+        throw new Exception("Parent category not found in database!!");
+      }
+
       //validation
       $dataToValidate = [
         "previousParent" => $previousParent,
@@ -127,9 +119,9 @@ class CategoryRequestHandlers
       ];
       $keys = [
         'newParent' => ['empty', 'required'],
-        'previousParent' => ['empty' ,'required']
+        'previousParent' => ['empty', 'required']
       ];
-      
+
       $validationResult = Validator::validate($dataToValidate, $keys);
       if (!$validationResult["validate"]) {
         $response = array(
@@ -140,7 +132,7 @@ class CategoryRequestHandlers
         );
         return $response;
       }
-      
+
       $response = $categoryModelObj->updateParent($_GET["previousParent"], $decodedData["newParent"]);
 
       if (!$response["status"]) {
@@ -152,31 +144,31 @@ class CategoryRequestHandlers
         "message" => $response["message"]
       ];
 
-    }catch(Exception$e){
+    } catch (Exception $e) {
       return [
-          "status" => "false",
-          "message" => $e->getMessage()
+        "status" => "false",
+        "message" => $e->getMessage()
       ];
     }
   }
 
-
-  public function updateChild(){
+  public static function updateChild()
+  {
     try {
       $categoryModelObj = new Category(new DBConnect());
 
       $jsonData = file_get_contents("php://input");
       $decodedData = json_decode($jsonData, true);
       $previousChild = $_GET["previousChild"];
-      if(empty($previousChild)){
+      if (empty($previousChild)) {
         throw new Exception("Previous child not provided!!");
       }
-      $result = $categoryModelObj->get($previousChild ,NULL);
+      $result = $categoryModelObj->get($previousChild, NULL);
 
-     if($result["status"]=="false"){
-      throw new Exception("Child category not found in database!!");
-     }
-      
+      if ($result["status"] == "false") {
+        throw new Exception("Child category not found in database to update!!");
+      }
+
       //validation
       $dataToValidate = [
         "previousChild" => $previousChild,
@@ -184,9 +176,9 @@ class CategoryRequestHandlers
       ];
       $keys = [
         'newChild' => ['empty', 'required'],
-        'previousChild' => ['empty' ,'required']
+        'previousChild' => ['empty', 'required']
       ];
-      
+
       $validationResult = Validator::validate($dataToValidate, $keys);
       if (!$validationResult["validate"]) {
         $response = array(
@@ -197,7 +189,7 @@ class CategoryRequestHandlers
         );
         return $response;
       }
-      
+
       $response = $categoryModelObj->updateCategory($previousChild, $decodedData["newChild"]);
 
       if (!$response["status"]) {
@@ -209,19 +201,104 @@ class CategoryRequestHandlers
         "message" => $response["message"]
       ];
 
-    }catch(Exception$e){
+    } catch (Exception $e) {
       return [
-          "status" => "false",
-          "message" => $e->getMessage(),
-          "statusCode" =>500
+        "status" => "false",
+        "message" => $e->getMessage(),
+        "statusCode" => 500
       ];
     }
   }
 
-  public static function deleteCategory()
+  public static function deleteChild()
   {
+    try {
+      $categoryModelObj = new Category(new DBConnect());
+
+      $childCategory = $_GET["childCategory"];
+
+      if (empty($childCategory)) {
+        throw new Exception(" Child Category not provided!!");
+      }
+
+      $result = $categoryModelObj->get($childCategory, NULL);
+
+      if ($result["status"] === "false") {
+        throw new Exception("Child category not found to delete!!");
+      }
+
+      $response = $categoryModelObj->deleteChild($childCategory);
+
+      if ($response["status"] == false) {
+        return [
+          "status" => $response["status"],
+          "message" => $response["message"],
+          "statusCode" => 500
+        ];
+      }
+      return [
+        "status" => $response["status"],
+        "statusCode" => 200,
+        "message" => "Child deleted successfully",
+        "data" => [
+          "childCategory" => $childCategory
+        ]
+      ];
+    } catch (Exception $e) {
+      return [
+        "status" => "false",
+        "message" => $e->getMessage(),
+        "statusCode" => 500
+      ];
+    }
+
+  }
+
+  public static function deleteParent()
+  {
+    try {
+      $categoryModelObj = new Category(new DBConnect());
+
+      $parentCategory = $_GET["parentCategory"];
+
+
+
+      if (empty($parentCategory)) {
+        throw new Exception(" Parent Category not provided!!");
+      }
+
+      $result = $categoryModelObj->get(NULL, $parentCategory);
+
+      if ($result["status"] === "false") {
+        throw new Exception("Parent category not found to delete!!");
+      }
+
+
+      $response = $categoryModelObj->deleteParent($parentCategory);
+
+      if ($response["status"] == false) {
+        return [
+          "status" => $response["status"],
+          "message" => $response["message"],
+          "statusCode" => 500
+        ];
+      }
+      return [
+        "status" => $response["status"],
+        "statusCode" => 200,
+        "message" => "Parent Category deleted successfully",
+        "data" => [
+          "parentCategory" => $parentCategory
+        ]
+      ];
+    } catch (Exception $e) {
+      return [
+        "status" => "false",
+        "message" => $e->getMessage(),
+        "statusCode" => 500
+      ];
+    }
+
   }
 }
-
-
 ?>
