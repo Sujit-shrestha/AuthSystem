@@ -1,7 +1,7 @@
 <?php
 namespace Model;
 
-include_once "../Configuration/database-connection.php";
+// include_once "../Configuration/database-connection.php";
 
 use Configg\DBConnect;
 
@@ -154,7 +154,6 @@ class User
           password = '$data[password]' ,
           username = '$data[username]' ,
           name = '$data[name]',
-          address = '$data[address]',
           user_type = '$data[user_type]'
       WHERE id = '$id'
        ";
@@ -189,9 +188,9 @@ class User
         $data["password"] = password_hash($data["password"], PASSWORD_BCRYPT);
         $sql = "
         INSERT INTO User 
-      (email , password , username,  name , address , user_type)
+      (email , password , username,  name  , user_type)
       VALUES
-      ('$data[email]' , '$data[password]' ,'$data[username]' ,'$data[name]' ,'$data[address]' ,'$data[user_type]')
+      ('$data[email]' , '$data[password]' ,'$data[username]' ,'$data[name]' ,'$data[user_type]')
       ";
 
         $result = $this->DBconn->conn->query($sql);

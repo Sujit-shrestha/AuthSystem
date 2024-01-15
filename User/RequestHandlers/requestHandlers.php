@@ -1,22 +1,10 @@
 <?php
 namespace RequestHandlers;
 
-require_once "./Configuration/config.php";
-require_once "./Middleware/authentication.php";
-require_once "./Configuration/database-connection.php";
-require_once "./Model/user-mdoel.php";
-require_once "./Configuration/session.php";
-require_once "./Routes/login.php";
-require_once "./Middleware/response.php";
-require_once "./Middleware/response.php";
-require_once "./Validate/validator.php";
-
 use Exception;
 use Middleware\JWTTokenHandlerAndAuthentication;
 use Configg\DBConnect;
 use Model\User;
-
-
 use Validate\Validator;
 
 class RequestHandlers
@@ -86,7 +74,7 @@ class RequestHandlers
 
     //explicitly assignning employee as user_type so that admin can only be created from database
     $decodedData["user_type"] = "employee";
-
+    $jsonData = json_encode($decodedData);
 
     //to validatte in the keys
     $keys = [
@@ -109,7 +97,9 @@ class RequestHandlers
 
     $checkIfUsernameExists = $userObj->get(NULL, $decodedData["username"]);
     if (isset($checkIfUsernameExists["id"])) {
-      unset($checkIfUsernameExists);
+
+      unset($checkIfUsernameExists["password"]);
+
       return [
         "status" => "false",
         "statusCode" => "409",
@@ -175,7 +165,6 @@ class RequestHandlers
           );
           return $response;
         }
-
         $id = $_GET["id"];
         if (!$id) {
           throw new Exception("Id not provided !!");
@@ -213,10 +202,7 @@ class RequestHandlers
         "statusCode" => 401,
         "message" => $e->getMessage()
       ];
-
     }
-
-
   }
   public static function deleteUser()
   {
@@ -239,8 +225,6 @@ class RequestHandlers
           return throw new Exception("User not found to delete!!");
         }
 
-
-
         $deleteStatus = $userObj->delete($id);
 
         if ($deleteStatus == true) {
@@ -249,18 +233,14 @@ class RequestHandlers
             "statusCode" => 200,
             "message" => "User if Id :$id deleted successfully"
           ];
-
         } else {
           return [
             "status" => "false",
             "statusCode" => 400,
             "message" => "$deleteStatus"
           ];
-
         }
-
       }
-
       //disconnecting from database
       $userObj->DBconn->disconnectFromDatabase();
 
@@ -269,7 +249,6 @@ class RequestHandlers
         "status" => "false",
         "message" => $e->getMessage()
       ];
-
     }
   }
   public static function getBrearerToken(): string
@@ -278,7 +257,6 @@ class RequestHandlers
       $authToken = $_SERVER["HTTP_AUTHORIZATION"] ?? false;
 
       if ($authToken === false) {
-
         throw new Exception("Authorization header not present!!");
       }
       $authToken = explode(" ", $authToken);
@@ -286,7 +264,6 @@ class RequestHandlers
       if (count($authToken) !== 2 || $authToken[0] !== "Bearer") {
         throw new Exception("Invalid bearer token format.");
       }
-
       return $authToken[1];
 
     } catch (Exception $e) {

@@ -10,7 +10,7 @@ class DBConnect
   private $hostname = "localhost:3000";
   private $username = "root";
   private $password = "";
-  private $database = "api_database";
+  private $database = "ams";
 
   public $conn;
 
