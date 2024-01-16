@@ -5,6 +5,7 @@ use Exception;
 use Model\Category;
 use Configg\DBConnect;
 use Validate\Validator;
+use Middleware\Authorization;
 
 class CategoryRequestHandlers
 {
@@ -13,6 +14,30 @@ class CategoryRequestHandlers
    */
   public static function createCategory()
   {
+    
+
+    //Authorizaiton
+   $response =  Authorization::verifyToken();
+  if(!$response["status"]){
+    return [
+      "status"=> $response["status"],
+      "statusCode" => 401,
+      "message" => $response["message"],
+      "data" => $response["data"]
+    ];
+  }
+
+    if($response["status"] == true && !$response["data"]["user_type"] == "admin"){
+      return [
+        "status"=> "dfasd".$response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+  
+  
+
     $categoryObj = new Category(new DBConnect());
     $jsonData = file_get_contents('php://input');
     $decodedData = json_decode($jsonData, true);
@@ -301,4 +326,3 @@ class CategoryRequestHandlers
 
   }
 }
-?>
