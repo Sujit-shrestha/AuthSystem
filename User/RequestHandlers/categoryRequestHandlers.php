@@ -12,31 +12,28 @@ class CategoryRequestHandlers
   /**
    * creates category
    */
-  public static function createCategory()
+  public static function createCategory(): array
   {
-    
 
     //Authorizaiton
-   $response =  Authorization::verifyToken();
-  if(!$response["status"]){
-    return [
-      "status"=> $response["status"],
-      "statusCode" => 401,
-      "message" => $response["message"],
-      "data" => $response["data"]
-    ];
-  }
-
-    if($response["status"] == true && !$response["data"]["user_type"] == "admin"){
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
       return [
-        "status"=> "dfasd".$response["status"],
+        "status" => $response["status"],
         "statusCode" => 401,
         "message" => $response["message"],
         "data" => $response["data"]
       ];
     }
-  
-  
+
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
 
     $categoryObj = new Category(new DBConnect());
     $jsonData = file_get_contents('php://input');
@@ -72,14 +69,18 @@ class CategoryRequestHandlers
     $response = $categoryObj->create($jsonData);
 
     if ($response["status"] === "false") {
-      throw new Exception("Unalble to create in database.");
+      return [
+        "status" => "false",
+        "statusCode" => 403,
+        "message" => "Unalble to create in database.",
+        "data" => []
+      ];
     }
     return [
       "status" => "true",
       "statusCode" => 200,
       "message" => "Category created succsessfully!!",
       "data" => json_decode($jsonData, true)
-
     ];
   }
 
