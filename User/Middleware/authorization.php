@@ -30,8 +30,6 @@ use Middleware\JWTTokenHandlerAndAuthentication;
       static $payload = [];
 
       $payload = JWT::decode($token, new key(JWTTokenHandlerAndAuthentication::$secret, JWTTokenHandlerAndAuthentication::$alg));
-    //  print_r($payload);
-    //  die;
       
       return [
         "status" => true,
