@@ -166,5 +166,3 @@ class JWTTokenHandlerAndAuthentication extends Authentication
   }
 
 }
-
-?>
