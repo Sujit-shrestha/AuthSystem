@@ -9,6 +9,10 @@ foreach (glob(__DIR__ . '/../Routes/Category/*.php') as $file) {
 
   require_once $file;
 }
+foreach (glob(__DIR__ . '/../Routes/Location/*.php') as $file) {
+
+  require_once $file;
+}
 foreach (glob(__DIR__ . '/../AccessControl/*.php') as $file) {
   require_once $file;
 }
