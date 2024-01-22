@@ -19,6 +19,14 @@ if ($path === "/category") {
 exit();
 }
 
+if($path === "/location"){
+
+
+    Route::location($path , "Routes\Location\\Location::run");
+
+    exit();
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && (($path === '/login') || ($path === '/user') )) {
 
   if ($path === '/login') {
@@ -56,4 +64,3 @@ switch ($result["user_type"]) {
 
     break;
 }
-?>
