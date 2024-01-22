@@ -55,7 +55,7 @@ class Category
     }
   }
   public static function create()
-  {
+  { 
     $response = CategoryRequestHandlers::createCategory();
     Response::respondWithJson($response, $response["statusCode"]);
   }
@@ -90,4 +90,3 @@ class Category
   }
 }
 
-?>
