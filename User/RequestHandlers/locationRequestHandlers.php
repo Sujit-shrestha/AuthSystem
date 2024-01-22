@@ -142,4 +142,58 @@ class LocationRequestHandlers
       ];
     }
   }
+
+  public static function deleteLocation():array{
+    try{
+      $locationObj = new Location(new DBConnect());
+      $jsonData = file_get_contents("php://input");
+      $decodedData = json_decode($jsonData , true);
+     
+      //validation
+      $keys = [
+        "location" => ['empty' , 'required']
+      ];
+      $validationResult = Validator::validate($decodedData, $keys);
+      if (!$validationResult["validate"]) {
+        return [
+          "status" => "false",
+          "statusCode" => "409",
+          "message" => $validationResult,
+          "data" => $decodedData
+        ];
+      }
+      //check if its in database
+      //check if is present in database
+      $result = $locationObj->get($decodedData["location"]);
+
+      if ($result["status"] == "false") {
+        throw new Exception("Location not found in database to delete!!");
+      }
+      
+      $response = $locationObj->deleteLocation($decodedData);
+      if(!$response["status"]){
+        return [
+          "status" => $response["status"],
+          "message" => $response["message"],
+          "statusCode" => 500
+        ];
+      }
+      return [
+        "status" => $response["status"],
+        "statusCode" => 200,
+        "message" => "Location deleted successfully",
+        "data" => $decodedData
+      ];
+      
+    }catch(Exception $e){
+      return [
+        "status" => "false",
+        "statusCode" => 409,
+        "message" => $e->getMessage() ,
+        "data" =>$decodedData
+      ];
+    }
+  }
+
+
 }
