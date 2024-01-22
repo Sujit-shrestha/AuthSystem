@@ -7,6 +7,7 @@ class Route
   public static function user($endpoint, $callbackFunction)
   {
     $endpoint = explode("/", trim($endpoint, "/"));
+     
     if ($endpoint[0] == "login") {
       $callbackFunction();
     }
@@ -20,7 +21,12 @@ class Route
     if ($endpoint[0] == "category") {
       $callbackFunction();
     }
+  }
 
+  public static function location($endpoint , $callbackFunction){
+    
+    $endpoint = explode("/" , trim($endpoint , "/"));
+    $callbackFunction();
   }
 
   public static function post($endpoint, $callbackFunction)
@@ -58,4 +64,3 @@ class Route
     }
   }
 }
-?>
