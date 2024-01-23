@@ -13,21 +13,18 @@ use Routes\Route;
 
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
-if ($path === "/category") {
-  
-  Route::category($path,"Routes\Category\\Category::run");
-exit();
+$pathOptions = ["/department", "/location", "/category"];
+
+//dyniamically creating callback names
+if (in_array($path, $pathOptions)) {
+  $trimmedPath = trim($path, '/');
+  $className = ucfirst($trimmedPath);
+
+  Route::$trimmedPath($path, "Routes\\" . $className . '\\' . $className . '::run');
+  //expected format  'Routes\Location\\Location::run'
+  exit();
 }
-
-if($path === "/location"){
-
-
-    Route::location($path , "Routes\Location\\Location::run");
-
-    exit();
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && (($path === '/login') || ($path === '/user') )) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && (($path === '/login') || ($path === '/user'))) {
 
   if ($path === '/login') {
     Route::user($path, "Routes\\Login::login");
