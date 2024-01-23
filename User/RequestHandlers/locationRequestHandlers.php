@@ -6,6 +6,7 @@ use Exception;
 use Validate\Validator;
 use Model\Location;
 use Configg\DBConnect;
+use Middleware\Authorization;
 
 
 class LocationRequestHandlers
@@ -16,6 +17,25 @@ class LocationRequestHandlers
    */
   public static function createLocation(): array
   {
+      //Authorizaiton
+      $response = Authorization::verifyToken();
+      if (!$response["status"]) {
+        return [
+          "status" => $response["status"],
+          "statusCode" => 401,
+          "message" => $response["message"],
+          "data" => $response["data"]
+        ];
+      }
+      //checks if user is not admin
+      if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+        return [
+          "status" => "dfasd" . $response["status"],
+          "statusCode" => 401,
+          "message" => $response["message"],
+          "data" => $response["data"]
+        ];
+      }
     $locationObj = new Location(new DBConnect());
     $jsonData = file_get_contents('php://input');
     $decodedData = json_decode($jsonData, true);
@@ -67,6 +87,25 @@ class LocationRequestHandlers
    */
   public static function getAllLocation():array{
     try{
+        //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
       $locationObj = new Location(new DBConnect());
       $response = $locationObj->getAll();
       if(!$response['status']){
@@ -92,6 +131,25 @@ class LocationRequestHandlers
 
   public static function updateLocation(){
     try{
+        //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
       $locationObj = new Location(new DBConnect());
       $jsonData = file_get_contents("php://input");
       $decodedData = json_decode($jsonData , true);
@@ -145,6 +203,25 @@ class LocationRequestHandlers
 
   public static function deleteLocation():array{
     try{
+        //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
       $locationObj = new Location(new DBConnect());
       $jsonData = file_get_contents("php://input");
       $decodedData = json_decode($jsonData , true);
