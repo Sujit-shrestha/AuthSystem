@@ -130,7 +130,7 @@ class Location {
       ";
       $result = $this->DBConn->conn->query($sql);
       if(!$result){
-        throw new Exception("Unable to delete parent in database!!");
+        throw new Exception("Unable to delete parent from database!!");
       }
       return [
         "status" => "true",
