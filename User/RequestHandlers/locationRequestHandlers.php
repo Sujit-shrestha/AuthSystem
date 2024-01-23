@@ -30,7 +30,7 @@ class LocationRequestHandlers
       //checks if user is not admin
       if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
         return [
-          "status" => "dfasd" . $response["status"],
+          "status" =>  $response["status"],
           "statusCode" => 401,
           "message" => $response["message"],
           "data" => $response["data"]
@@ -41,7 +41,7 @@ class LocationRequestHandlers
     $decodedData = json_decode($jsonData, true);
 
     $keys = [
-      'location' => ['empty']
+      'location' => ['empty' , 'required']
     ];
     $validationResult = Validator::validate($decodedData, $keys);
 
@@ -144,7 +144,7 @@ class LocationRequestHandlers
     //checks if user is not admin
     if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" =>  $response["status"],
         "statusCode" => 401,
         "message" => $response["message"],
         "data" => $response["data"]
@@ -216,7 +216,7 @@ class LocationRequestHandlers
     //checks if user is not admin
     if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" =>  $response["status"],
         "statusCode" => 401,
         "message" => $response["message"],
         "data" => $response["data"]
