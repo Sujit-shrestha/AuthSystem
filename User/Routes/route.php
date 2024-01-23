@@ -4,6 +4,7 @@ namespace Routes;
 
 class Route
 {
+
   public static function user($endpoint, $callbackFunction)
   {
     $endpoint = explode("/", trim($endpoint, "/"));
@@ -29,6 +30,10 @@ class Route
     $callbackFunction();
   }
 
+  public static function department($endpoint , $callbackFunction)
+  {
+    $callbackFunction();
+  }
   public static function post($endpoint, $callbackFunction)
   {
     // $endpoint = explode("/", trim($endpoint, "/"));
