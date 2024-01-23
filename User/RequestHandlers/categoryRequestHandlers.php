@@ -125,6 +125,26 @@ class CategoryRequestHandlers
    */
   public static function getAll()
   {
+     //Authorizaiton
+     $response = Authorization::verifyToken();
+     if (!$response["status"]) {
+       return [
+         "status" => $response["status"],
+         "statusCode" => 401,
+         "message" => $response["message"],
+         "data" => $response["data"]
+       ];
+     }
+     //checks if user is not admin
+     if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+       return [
+         "status" => "dfasd" . $response["status"],
+         "statusCode" => 401,
+         "message" => $response["message"],
+         "data" => $response["data"]
+       ];
+     }
+
     $categoryObj = new Category(new DBConnect());
     $response = $categoryObj->getAll();
 
@@ -141,6 +161,25 @@ class CategoryRequestHandlers
    */
   public static function getByParent()
   {
+     //Authorizaiton
+     $response = Authorization::verifyToken();
+     if (!$response["status"]) {
+       return [
+         "status" => $response["status"],
+         "statusCode" => 401,
+         "message" => $response["message"],
+         "data" => $response["data"]
+       ];
+     }
+     //checks if user is not admin
+     if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+       return [
+         "status" => "dfasd" . $response["status"],
+         "statusCode" => 401,
+         "message" => $response["message"],
+         "data" => $response["data"]
+       ];
+     }
     $categoryModelObj = new Category(new DBConnect());
     $parent = $_GET["parent"];
     $response = $categoryModelObj->get(NULL, $parent);
@@ -160,6 +199,25 @@ class CategoryRequestHandlers
   public static function updateParent(): array
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
 
       $jsonData = file_get_contents("php://input");
@@ -217,6 +275,25 @@ class CategoryRequestHandlers
   public static function updateChild()
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
 
       $jsonData = file_get_contents("php://input");
@@ -275,6 +352,25 @@ class CategoryRequestHandlers
   public static function deleteChild()
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
 
       $childCategory = $_GET["childCategory"];
@@ -319,6 +415,25 @@ class CategoryRequestHandlers
   public static function deleteParent()
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      return [
+        "status" => "dfasd" . $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
 
       $parentCategory = $_GET["parentCategory"];
