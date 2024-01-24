@@ -32,7 +32,7 @@ class Login
       $_SESSION["login"] = true;
 
       $response = [
-        "status" => "success",
+        "status" => "true",
         "message" => "User authenticated successfully.",
         "statusCode" => 200,
         "authToken" => $authToken
@@ -49,4 +49,3 @@ class Login
     }
   }
 }
-?>
