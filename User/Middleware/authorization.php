@@ -20,6 +20,11 @@ interface AuthorizationInterface
 class Authorization implements AuthorizationInterface
 {
 
+  /**
+   * verifies bearer token from auhotrization header
+   * @return array
+   * @param none
+   */
   public static function verifyToken(): array
   {
     try {
@@ -47,7 +52,7 @@ class Authorization implements AuthorizationInterface
         "message" => "User authorised using authToken.",
         "data" => [
           "id" => $payload->data->id,
-          "username" => $payload->data->username,
+          // "username" => $payload->data->username,
           "user_type" => $payload->data->user_type
         ],
         "authToken" => $token
@@ -80,6 +85,11 @@ class Authorization implements AuthorizationInterface
     }
   }
 
+  /**
+   * gets bearer token from auhtorization header of request 
+   * @param none
+   * @return array
+   */
   public static function getBrearerToken(): array
   {
     try {
