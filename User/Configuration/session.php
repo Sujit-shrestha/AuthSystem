@@ -8,16 +8,12 @@ class Session
   {
     try {
       session_start();
-      $_SESSION["startTime"] = time();
-      $_SESSION["sessionId"] = session_id();
-      session_write_close();
       return true;
     } catch (\Exception $e) {
       return false;
     }
 
   }
-
   public static function update($key, $value)
   {
     try {
@@ -59,4 +55,3 @@ class Session
 
 }
 
-?>
