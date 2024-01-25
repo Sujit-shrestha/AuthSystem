@@ -1,6 +1,7 @@
 <?php
-
 namespace Index;
+
+session_start();
 
 
 require_once __DIR__ . "/Configuration/config.php";
@@ -13,7 +14,13 @@ use Routes\Route;
 
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
-$pathOptions = ["/department", "/location", "/category"];
+$pathOptions = [
+                "/department",
+                "/location",
+                "/category",
+                "/logout",
+                "/login"
+              ];
 
 //dyniamically creating callback names
 if (in_array($path, $pathOptions)) {
@@ -24,12 +31,7 @@ if (in_array($path, $pathOptions)) {
   //expected format  'Routes\Location\\Location::run'
   exit();
 }
-if ($_SERVER["REQUEST_METHOD"] == "POST" && (($path === '/login') || ($path === '/user'))) {
-
-  if ($path === '/login') {
-    Route::user($path, "Routes\\Login::login");
-    exit();
-  }
+if ($_SERVER["REQUEST_METHOD"] == "POST" && ($path === '/user')) {
 
   //creating case for no admin token 
   if ($path === '/user') {

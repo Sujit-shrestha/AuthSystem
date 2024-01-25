@@ -34,6 +34,12 @@ class Route
   {
     $callbackFunction();
   }
+  public static function logout($endpoint , $callbackFunction){
+    $callbackFunction();
+  }
+  public static function login($endpoint , $callbackFunction){
+    $callbackFunction();
+  }
   public static function post($endpoint, $callbackFunction)
   {
     // $endpoint = explode("/", trim($endpoint, "/"));
