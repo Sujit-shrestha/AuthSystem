@@ -10,36 +10,11 @@ class Login
 {
   public static function login()
   {
-
-    $authenticationObj = new JWTTokenHandlerAndAuthentication(new User(new DBConnect()));
+    $userObj = new User(new DBConnect());
+    $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
 
     $status = $authenticationObj->authenticate($_POST["username"], $_POST["password"]);
-
-    if ($status) {
-
-      //defining payload
-      $payload = array(
-        "username" => $_POST["username"],
-        "password" => $_POST["password"],
-        "user_type" => $_SESSION["user_type"],
-        "id" => $_SESSION["id"] //taking id from session as id is injected when authenticated
-      );
-
-      //creating JWT token 
-      $authToken = JWTTokenHandlerAndAuthentication::createToken($payload);
-
-      //sets login true 
-      $_SESSION["login"] = true;
-
-      $response = [
-        "status" => "true",
-        "message" => "User authenticated successfully.",
-        "statusCode" => 200,
-        "authToken" => $authToken
-      ];
-      Response::respondWithJson($response, $response["statusCode"]);
-    } else {
-      // setcookie("authToken", "", time() + 3600, "/");
+    if(!$status){
       $response = [
         "status" => "false",
         "message" => "Unable to authenticate the user.",
@@ -47,5 +22,33 @@ class Login
       ];
       Response::respondWithJson($response, $response["statusCode"]);
     }
+    $userData = $userObj->get(NULL , $_POST["username"]);
+      //defining payload
+      $payload = array(
+        "user_type" =>  $userData["user_type"],
+        "id" => $userData["id"],
+      );
+      //creating JWT token 
+      $authToken = JWTTokenHandlerAndAuthentication::createToken($payload);
+
+      //storing access_token in session
+      session_start();
+      $_SESSION["authToken"] = $authToken;
+      session_write_close();
+
+      // print_r($_SESSION);
+      $respose_payload = [
+        "access_token" => $authToken ,
+        "user_id"=> $userData["id"],
+        "user_type" =>$userData["user_type"]
+      ];
+
+      $response = [
+        "status" => true,
+        "message" => "User authenticated successfully.",
+        "payload" => $respose_payload
+      ];
+      Response::respondWithJson($response);
   }
 }
+
