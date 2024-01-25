@@ -1,15 +1,17 @@
 <?php
-namespace Routes;
 
-use Middleware\JWTTokenHandlerAndAuthentication;
+namespace RequestHandlers;
+
+
 use Configg\DBConnect;
+use Middleware\JWTTokenHandlerAndAuthentication;
 use Model\User;
 use Middleware\Response;
 
-class Login
+
+class LoginRequestHandlers
 {
-  public static function login()
-  {
+  public static function login(){
     $userObj = new User(new DBConnect());
     $authenticationObj = new JWTTokenHandlerAndAuthentication($userObj);
 
@@ -43,12 +45,11 @@ class Login
         "user_type" =>$userData["user_type"]
       ];
 
-      $response = [
+       return [
         "status" => true,
         "message" => "User authenticated successfully.",
         "payload" => $respose_payload
       ];
-      Response::respondWithJson($response);
   }
-}
 
+}

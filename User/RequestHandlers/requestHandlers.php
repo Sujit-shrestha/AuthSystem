@@ -226,18 +226,18 @@ class RequestHandlers
         }
 
         $deleteStatus = $userObj->delete($id);
-
-        if ($deleteStatus == true) {
+      
+        if ($deleteStatus["status"] == true) {
           return [
             "status" => "true",
             "statusCode" => 200,
-            "message" => "User if Id :$id deleted successfully"
+            "message" => "User of Id :$id deleted successfully"
           ];
         } else {
           return [
             "status" => "false",
             "statusCode" => 400,
-            "message" => "$deleteStatus"
+            "message" => "$deleteStatus[message]"
           ];
         }
       }
@@ -299,4 +299,3 @@ class RequestHandlers
   }
 }
 
-?>
