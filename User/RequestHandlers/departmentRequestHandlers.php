@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace RequestHandlers;
 
@@ -16,31 +16,31 @@ class DepartmentRequestHandlers
    */
   public static function createDepartment(): array
   {
-      //Authorizaiton
-      $response = Authorization::verifyToken();
-      if (!$response["status"]) {
-        return [
-          "status" => $response["status"],
-          "statusCode" => 401,
-          "message" => $response["message"],
-          "data" => $response["data"]
-        ];
-      }
-      //checks if user is not admin
-      if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
-        return [
-          "status" =>  $response["status"],
-          "statusCode" => 401,
-          "message" => $response["message"],
-          "data" => $response["data"]
-        ];
-      }
+    //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
     $departmentObj = new Department(new DBConnect());
     $jsonData = file_get_contents('php://input');
     $decodedData = json_decode($jsonData, true);
 
     $keys = [
-      'department' => ['empty' , 'required']
+      'department' => ['empty', 'required']
     ];
     $validationResult = Validator::validate($decodedData, $keys);
 
@@ -54,7 +54,6 @@ class DepartmentRequestHandlers
     }
 
     $checkIfDepartmentExists = $departmentObj->get($decodedData["department"]);
-    
 
     if ($checkIfDepartmentExists["status"] === "true") {
       return [
@@ -86,30 +85,31 @@ class DepartmentRequestHandlers
    * @return  array
    * gets all the avaliable locations in database 
    */
-  public static function getAllDepartment():array{
-    try{
-        //Authorizaiton
-    $response = Authorization::verifyToken();
-    if (!$response["status"]) {
-      return [
-        "status" => $response["status"],
-        "statusCode" => 401,
-        "message" => $response["message"],
-        "data" => $response["data"]
-      ];
-    }
-    //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
-      return [
-        "status" => "dfasd" . $response["status"],
-        "statusCode" => 401,
-        "message" => $response["message"],
-        "data" => $response["data"]
-      ];
-    }
+  public static function getAllDepartment(): array
+  {
+    try {
+      //Authorizaiton
+      $response = Authorization::verifyToken();
+      if (!$response["status"]) {
+        return [
+          "status" => $response["status"],
+          "statusCode" => 401,
+          "message" => $response["message"],
+          "data" => $response["data"]
+        ];
+      }
+      //checks if user is not admin
+      if ($response["data"]["user_type"] !== "admin") {
+        return [
+          "status" => false,
+          "statusCode" => 401,
+          "message" => "User unauthorised",
+          "data" => $response["data"]
+        ];
+      }
       $departmentObj = new Department(new DBConnect());
       $response = $departmentObj->getAll();
-      if(!$response['status']){
+      if (!$response['status']) {
         throw new Exception("Unable to fetch from database!!");
       }
 
@@ -120,55 +120,56 @@ class DepartmentRequestHandlers
         "data" => $response['data']
       ];
 
-    }catch(Exception $e){
+    } catch (Exception $e) {
       return [
         "status" => "false",
         "statusCode" => 404,
-        "message" => $e->getMessage() ,
+        "message" => $e->getMessage(),
         "data" => []
       ];
     }
   }
 
-  public static function updateDepartment(){
-    try{
-        //Authorizaiton
-    $response = Authorization::verifyToken();
-    if (!$response["status"]) {
-      return [
-        "status" => $response["status"],
-        "statusCode" => 401,
-        "message" => $response["message"],
-        "data" => $response["data"]
-      ];
-    }
-    //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
-      return [
-        "status" => "dfasd" . $response["status"],
-        "statusCode" => 401,
-        "message" => $response["message"],
-        "data" => $response["data"]
-      ];
-    }
+  public static function updateDepartment()
+  {
+    try {
+      //Authorizaiton
+      $response = Authorization::verifyToken();
+      if (!$response["status"]) {
+        return [
+          "status" => $response["status"],
+          "statusCode" => 401,
+          "message" => $response["message"],
+          "data" => $response["data"]
+        ];
+      }
+      //checks if user is not admin
+      if ($response["data"]["user_type"] !== "admin") {
+        return [
+          "status" => false,
+          "statusCode" => 401,
+          "message" => "User unauthorised",
+          "data" => $response["data"]
+        ];
+      }
       $departmentObj = new Department(new DBConnect());
       $jsonData = file_get_contents("php://input");
-      $decodedData = json_decode($jsonData , true);
-     
+      $decodedData = json_decode($jsonData, true);
+
       //validation
       $keys = [
         "previousDepartment" => ['empty', 'required'],
-        "newDepartment" => ['empty' , 'required']
+        "newDepartment" => ['empty', 'required']
       ];
 
-      $validationResult = Validator::validate($decodedData , $keys);
+      $validationResult = Validator::validate($decodedData, $keys);
 
-     
-      if(!$validationResult["validate"]){
-        return  [
+
+      if (!$validationResult["validate"]) {
+        return [
           "status" => "false",
           "statusCode" => "409",
-          "message"=> $validationResult,
+          "message" => $validationResult,
           "data" => $decodedData
         ];
       }
@@ -179,9 +180,9 @@ class DepartmentRequestHandlers
       if ($result["status"] == "false") {
         throw new Exception("Department not found in database to update!!");
       }
-     
+
       $response = $departmentObj->updateDepartment($decodedData);
-    
+
       if (!$response["status"]) {
         throw new Exception("Unalbe to update deaprtment in database!!");
       }
@@ -192,44 +193,45 @@ class DepartmentRequestHandlers
         "data" => $decodedData
       ];
 
-    }catch(Exception $e){
+    } catch (Exception $e) {
       return [
         "status" => "false",
         "statusCode" => 409,
-        "message" => $e->getMessage() ,
+        "message" => $e->getMessage(),
         "data" => $decodedData
       ];
     }
   }
 
-  public static function deleteDepartment():array{
-    try{
-        //Authorizaiton
-    $response = Authorization::verifyToken();
-    if (!$response["status"]) {
-      return [
-        "status" => $response["status"],
-        "statusCode" => 401,
-        "message" => $response["message"],
-        "data" => $response["data"]
-      ];
-    }
-    //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
-      return [
-        "status" => "dfasd" . $response["status"],
-        "statusCode" => 401,
-        "message" => $response["message"],
-        "data" => $response["data"]
-      ];
-    }
+  public static function deleteDepartment(): array
+  {
+    try {
+      //Authorizaiton
+      $response = Authorization::verifyToken();
+      if (!$response["status"]) {
+        return [
+          "status" => $response["status"],
+          "statusCode" => 401,
+          "message" => $response["message"],
+          "data" => $response["data"]
+        ];
+      }
+      //checks if user is not admin
+      if ($response["data"]["user_type"] !== "admin") {
+        return [
+          "status" => false,
+          "statusCode" => 401,
+          "message" => "User unauthorised",
+          "data" => $response["data"]
+        ];
+      }
       $departmentObj = new Department(new DBConnect());
       $jsonData = file_get_contents("php://input");
-      $decodedData = json_decode($jsonData , true);
-     
+      $decodedData = json_decode($jsonData, true);
+
       //validation
       $keys = [
-        "department" => ['empty' , 'required']
+        "department" => ['empty', 'required']
       ];
       $validationResult = Validator::validate($decodedData, $keys);
       if (!$validationResult["validate"]) {
@@ -247,9 +249,9 @@ class DepartmentRequestHandlers
       if ($result["status"] == "false") {
         throw new Exception("Department not found in database to delete!!");
       }
-      
+
       $response = $departmentObj->deleteDepartment($decodedData);
-      if(!$response["status"]){
+      if (!$response["status"]) {
         return [
           "status" => $response["status"],
           "message" => $response["message"],
@@ -262,13 +264,13 @@ class DepartmentRequestHandlers
         "message" => "Department deleted successfully",
         "data" => $decodedData
       ];
-      
-    }catch(Exception $e){
+
+    } catch (Exception $e) {
       return [
         "status" => "false",
         "statusCode" => 409,
-        "message" => $e->getMessage() ,
-        "data" =>$decodedData
+        "message" => $e->getMessage(),
+        "data" => $decodedData
       ];
     }
   }
