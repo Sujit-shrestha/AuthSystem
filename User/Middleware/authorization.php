@@ -45,7 +45,7 @@ class Authorization implements AuthorizationInterface
       $sessionToken = $_SESSION["authToken"];
       //check if the token is same one present in session
       if ($providedToken != $sessionToken) {
-        throw new \Firebase\JWT\ExpiredException("Token does not match !!");
+        throw new \Firebase\JWT\ExpiredException("Token Invalid !!");
       }
       return [
         "status" => true,
