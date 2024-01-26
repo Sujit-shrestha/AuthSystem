@@ -26,11 +26,11 @@ class CategoryRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
@@ -136,15 +136,14 @@ class CategoryRequestHandlers
        ];
      }
      //checks if user is not admin
-     if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+     if ($response["data"]["user_type"] !== "admin") {
        return [
-         "status" => "dfasd" . $response["status"],
+         "status" => false,
          "statusCode" => 401,
-         "message" => $response["message"],
+         "message" => "User unauthorised",
          "data" => $response["data"]
        ];
      }
-
     $categoryObj = new Category(new DBConnect());
     $response = $categoryObj->getAll();
 
@@ -172,14 +171,14 @@ class CategoryRequestHandlers
        ];
      }
      //checks if user is not admin
-     if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
-       return [
-         "status" => "dfasd" . $response["status"],
-         "statusCode" => 401,
-         "message" => $response["message"],
-         "data" => $response["data"]
-       ];
-     }
+     if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
     $categoryModelObj = new Category(new DBConnect());
     $parent = $_GET["parent"];
     $response = $categoryModelObj->get(NULL, $parent);
@@ -210,11 +209,11 @@ class CategoryRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
@@ -286,11 +285,11 @@ class CategoryRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
@@ -363,11 +362,11 @@ class CategoryRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
@@ -426,19 +425,16 @@ class CategoryRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
       $categoryModelObj = new Category(new DBConnect());
-
       $parentCategory = $_GET["parentCategory"];
-
-
 
       if (empty($parentCategory)) {
         throw new Exception(" Parent Category not provided!!");
@@ -449,8 +445,6 @@ class CategoryRequestHandlers
       if ($result["status"] === "false") {
         throw new Exception("Parent category not found to delete!!");
       }
-
-
       $response = $categoryModelObj->deleteParent($parentCategory);
 
       if ($response["status"] == false) {
