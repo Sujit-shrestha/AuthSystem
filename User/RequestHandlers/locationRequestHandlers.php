@@ -28,11 +28,11 @@ class LocationRequestHandlers
         ];
       }
       //checks if user is not admin
-      if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+      if ($response["data"]["user_type"] !== "admin") {
         return [
-          "status" =>  $response["status"],
+          "status" => false,
           "statusCode" => 401,
-          "message" => $response["message"],
+          "message" => "User unauthorised",
           "data" => $response["data"]
         ];
       }
@@ -98,11 +98,11 @@ class LocationRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" => "dfasd" . $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
@@ -142,11 +142,11 @@ class LocationRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" =>  $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
@@ -214,11 +214,11 @@ class LocationRequestHandlers
       ];
     }
     //checks if user is not admin
-    if ($response["status"] == true && !$response["data"]["user_type"] == "admin") {
+    if ($response["data"]["user_type"] !== "admin") {
       return [
-        "status" =>  $response["status"],
+        "status" => false,
         "statusCode" => 401,
-        "message" => $response["message"],
+        "message" => "User unauthorised",
         "data" => $response["data"]
       ];
     }
