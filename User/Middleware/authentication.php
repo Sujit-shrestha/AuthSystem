@@ -27,30 +27,14 @@ abstract class Authentication
   public function authenticate($username, $password): bool
   {
     try {
-
       $result = $this->userModel->get(null, $username);
-
-      if ($result) {
-        if (password_verify($password, $result["password"])) {
-          //user gets authenticated if code reaches here
-
-          //adding user_type into session
-          Session::create();
-
-
-          $_SESSION["id"] = $result["id"];
-          $_SESSION["user_type"] = $result["user_type"];
-          session_write_close();
-
-
-          return true;
-        } else {
-          throw new \Exception("Unable to verify for given password provided!!");
-        }
-      } else {
+      if (!$result) {
         throw new \Exception("Unable to get from database on given username!!");
-
       }
+      if (!password_verify($password, $result["password"])) {
+        throw new \Exception("Unable to verify for given password provided!!");
+      }
+      return true;
 
     } catch (\Exception $e) {
       error_log($e->getMessage());
@@ -59,7 +43,7 @@ abstract class Authentication
   }
 
   abstract public static function createToken(array $payload, int $exp);
-  abstract public static function verifyToken(string $token);
+  // abstract public static function verifyToken(string $token);
 
 
 }
@@ -68,14 +52,15 @@ class JWTTokenHandlerAndAuthentication extends Authentication
 {
 
   static $token = [];
+  static $tokenBlackList = [];
   static $secret = "INTUJI_SECRET KEY";
   // static $secretForNormalUser = "PINKUJI_SECRET KEY";
   static $alg = 'HS256';
 
   /**
    * can create token with static call
-   * @param array payload  , int exp
-   * @ return token||false
+   * @param array payload  || int exp
+   * @ return token||bool
    */
   public static function createToken(array $payload, int $exp = 3600)
   {
@@ -85,7 +70,6 @@ class JWTTokenHandlerAndAuthentication extends Authentication
         "exp" => time() + $exp,
         "data" => $payload
       ];
-
       self::$token = JWT::encode(self::$token, self::$secret, self::$alg);
 
       return self::$token;
@@ -98,32 +82,12 @@ class JWTTokenHandlerAndAuthentication extends Authentication
 
   }
   /**
-   * verifies provided token
-   * @param string token
-   * @return bool
+   * gets user_type from token provided
+   * @param string||array
+   * @return array
+   * 
    */
-  public static function verifyToken(string $token): bool
-  {
-    try {
-      static::$token = $token;
-      static::$token = JWT::decode($token, new key(static::$secret, static::$alg));
-
-      return true;
-
-    } catch (\Firebase\JWT\ExpiredException $e) {
-      // echo "Token Expired";
-      error_log($e->getMessage());
-      return false;
-
-    } catch (\Firebase\JWT\SignatureInvalidException $e) {
-      // echo "Invalid token provided";
-      error_log($e->getMessage());
-      return false;
-    }
-
-  }
-
-  public static function getSpecificValueFromToken($authToken, $key)
+  public static function getSpecificValueFromToken($authToken, $key): array
   {
     try {
 
@@ -160,11 +124,30 @@ class JWTTokenHandlerAndAuthentication extends Authentication
         "user_type" => "",
         "message" => $e->getMessage()
       ];
-
     }
-
   }
 
+  /**
+   * verifies token and destroys the session assisting in logout
+   * @return array
+   */
+  public static function expireToken(): array
+  {
+    try {
+      $response = Authorization::verifyToken();
+      if (!$response["status"]) {
+        throw new \Exception($response["message"]);
+      }
+      Session::destroy();
+      return [
+        "status" => true,
+        "message" => "Logged out by token expiraiton."
+      ];
+    } catch (\Exception $e) {
+      return [
+        "status" => false,
+        "message" => $e->getMessage()
+      ];
+    }
+  }
 }
-
-?>

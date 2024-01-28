@@ -92,10 +92,6 @@ class User
           throw new \Exception("Unable to fetch the given id data");
         } else {
           $row = $result->fetch_assoc();
-
-          //hiding password in returned array -->problem when authenticating
-          // unset($row["password"]);
-
           return $row;
         }
       }
@@ -111,8 +107,6 @@ class User
         } else {
           $row = $result->fetch_assoc();
 
-          //hiding password in returned array
-          // unset($row["password"]);
           return $row;
         }
       }
@@ -120,9 +114,6 @@ class User
         "status" => "false",
         "message" => "Unable to get data"
       ];
-
-     
-      
 
     } catch (\Exception $e) {
       $error = $e->getMessage();
@@ -162,7 +153,6 @@ class User
       }
 
     } catch (\Exception $e) {
-      
       return [
         "status" => "false",
         "message" => $e->getMessage()
@@ -217,19 +207,19 @@ class User
       WHERE id = '$id'
       ";
       $result = $this->DBconn->conn->query($sql);
-
-      return $result;
+      if(!$result){
+        throw new \Exception("Unable to delete user from database!!");
+      }
+      return [
+        "status" => "true",
+        "message" => "User deleted successfully.",
+      ];
 
     } catch (\Exception $e) {
-
       return array(
         "status" => "false",
         "message" => $e->getMessage()
       );
     }
-
   }
-
 }
-
-?>

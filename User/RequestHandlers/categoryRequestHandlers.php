@@ -5,20 +5,42 @@ use Exception;
 use Model\Category;
 use Configg\DBConnect;
 use Validate\Validator;
+use Middleware\Authorization;
 
 class CategoryRequestHandlers
 {
   /**
    * creates category
    */
-  public static function createCategory()
+  public static function createCategory(): array
   {
+
+    //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
+
     $categoryObj = new Category(new DBConnect());
     $jsonData = file_get_contents('php://input');
     $decodedData = json_decode($jsonData, true);
     $keys = [
       'category_name' => ['empty'],
-      'parent' => ['empty'],
+      // 'parent' => ['empty'],
     ];
 
     $validationResult = Validator::validate($decodedData, $keys);
@@ -30,6 +52,42 @@ class CategoryRequestHandlers
         "message" => $validationResult,
         "data" => json_decode($jsonData, true)
       ];
+    }
+
+    //parent is empty --->  creation of parent category
+    if(empty($decodedData["parent"])){
+     $parentCreation = $decodedData;
+     $parentCreation["parent"] = $parentCreation["category_name"];
+     $parentCreation["category_name"]=NULL;
+
+     //checking in database
+    $checkIfParentCategoryExists = $categoryObj->get( NULL , $parentCreation["parent"]);
+
+    if ($checkIfParentCategoryExists["status"] === "true") {
+      return [
+        "status" => "false",
+        "statusCode" => 403,
+        "message" => "Parent Category alredy exists",
+        "data" => []
+      ];
+    }
+      $response = $categoryObj->create(json_encode($parentCreation));
+
+      
+    if ($response["status"] === "false") {
+      return [
+        "status" => "false",
+        "statusCode" => 403,
+        "message" => "Unalble to create in database.",
+        "data" => []
+      ];
+    }
+    return [
+      "status" => "true",
+      "statusCode" => 200,
+      "message" => "Category created succsessfully!!",
+      "data" => $parentCreation
+    ];
     }
 
     //checking in database
@@ -47,14 +105,18 @@ class CategoryRequestHandlers
     $response = $categoryObj->create($jsonData);
 
     if ($response["status"] === "false") {
-      throw new Exception("Unalble to create in database.");
+      return [
+        "status" => "false",
+        "statusCode" => 403,
+        "message" => "Unalble to create in database.",
+        "data" => []
+      ];
     }
     return [
       "status" => "true",
       "statusCode" => 200,
       "message" => "Category created succsessfully!!",
       "data" => json_decode($jsonData, true)
-
     ];
   }
 
@@ -63,6 +125,25 @@ class CategoryRequestHandlers
    */
   public static function getAll()
   {
+     //Authorizaiton
+     $response = Authorization::verifyToken();
+     if (!$response["status"]) {
+       return [
+         "status" => $response["status"],
+         "statusCode" => 401,
+         "message" => $response["message"],
+         "data" => $response["data"]
+       ];
+     }
+     //checks if user is not admin
+     if ($response["data"]["user_type"] !== "admin") {
+       return [
+         "status" => false,
+         "statusCode" => 401,
+         "message" => "User unauthorised",
+         "data" => $response["data"]
+       ];
+     }
     $categoryObj = new Category(new DBConnect());
     $response = $categoryObj->getAll();
 
@@ -79,6 +160,25 @@ class CategoryRequestHandlers
    */
   public static function getByParent()
   {
+     //Authorizaiton
+     $response = Authorization::verifyToken();
+     if (!$response["status"]) {
+       return [
+         "status" => $response["status"],
+         "statusCode" => 401,
+         "message" => $response["message"],
+         "data" => $response["data"]
+       ];
+     }
+     //checks if user is not admin
+     if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
     $categoryModelObj = new Category(new DBConnect());
     $parent = $_GET["parent"];
     $response = $categoryModelObj->get(NULL, $parent);
@@ -98,6 +198,25 @@ class CategoryRequestHandlers
   public static function updateParent(): array
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
 
       $jsonData = file_get_contents("php://input");
@@ -155,6 +274,25 @@ class CategoryRequestHandlers
   public static function updateChild()
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
 
       $jsonData = file_get_contents("php://input");
@@ -213,6 +351,25 @@ class CategoryRequestHandlers
   public static function deleteChild()
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
 
       $childCategory = $_GET["childCategory"];
@@ -257,11 +414,27 @@ class CategoryRequestHandlers
   public static function deleteParent()
   {
     try {
+       //Authorizaiton
+    $response = Authorization::verifyToken();
+    if (!$response["status"]) {
+      return [
+        "status" => $response["status"],
+        "statusCode" => 401,
+        "message" => $response["message"],
+        "data" => $response["data"]
+      ];
+    }
+    //checks if user is not admin
+    if ($response["data"]["user_type"] !== "admin") {
+      return [
+        "status" => false,
+        "statusCode" => 401,
+        "message" => "User unauthorised",
+        "data" => $response["data"]
+      ];
+    }
       $categoryModelObj = new Category(new DBConnect());
-
       $parentCategory = $_GET["parentCategory"];
-
-
 
       if (empty($parentCategory)) {
         throw new Exception(" Parent Category not provided!!");
@@ -272,8 +445,6 @@ class CategoryRequestHandlers
       if ($result["status"] === "false") {
         throw new Exception("Parent category not found to delete!!");
       }
-
-
       $response = $categoryModelObj->deleteParent($parentCategory);
 
       if ($response["status"] == false) {
@@ -301,4 +472,3 @@ class CategoryRequestHandlers
 
   }
 }
-?>
